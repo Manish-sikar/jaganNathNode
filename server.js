@@ -32,3 +32,10 @@ app.listen(PORT, async () => {
   }
   console.log(`Server is running on port ${PORT}`);
 });
+
+
+// {
+//   "version":2,
+//   "builds": [{"src": "./server.js","use":"@versel/node" }],
+//   "routes": [{"src": "/(.*)", "dest":"/" }]
+// }
