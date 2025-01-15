@@ -1,0 +1,230 @@
+const { comparePassword, JwtCreate } = require("../services/authServices");
+const Customer = require("../models/userRegModel");
+const bcrypt = require("bcrypt");
+
+
+
+const UserLogin = async (req, res) => {
+  try {
+    const { emailORphone, password } = req.body;
+
+    // Validate input
+    if (!emailORphone || !password) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    // Find the user by either email or phone
+    const user = await Customer.findOne({
+      $or: [{ email: emailORphone }, { phone: emailORphone }],
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Compare the provided password with the hashed password stored in the database
+    const passwordMatch = await comparePassword(password, user.password);
+
+    if (!passwordMatch) {
+      return res.status(401).json({ error: "Invalid password" });
+    }
+
+    // Generate a JWT token for the user
+    const token = await JwtCreate(user);
+
+    // Return a successful response with user details and token
+    res.status(200).json({
+      token,
+      user_Id: user._id,
+      user_name: `${user.firstName} ${user.lastName}`,
+      email: user.email,
+      phone: user.phone,
+    });
+  } catch (error) {
+    console.error("Error logging in:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+
+// const UserRegister = async (req, res) => {
+//   try {
+//     console.log(req.body)
+//     const { UserName, password } = req.body;
+
+//     // Validate input
+//     if (!UserName || !password) {
+//       return res.status(400).json({ error: "All fields are required" });
+//     }
+
+//     // Hash the password
+//     const hashedPassword = await bcrypt.hash(password, 10); // 10 is the salt rounds
+
+//     // Save the new user to the database
+//     let newUser = new LoginModel({
+//       UserName,
+//       password: hashedPassword,
+//     });
+// console.log(newUser)
+//     await newUser.save();
+//     res.status(201).json({ message: "User created successfully" });
+//   } catch (error) {
+//     console.error("Error creating user:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+
+// const UserRegister = async (req, res) => {
+//   try {
+//     const {
+//       firstName,
+//       lastName,
+//       birthday,
+//       phone,
+//       email,
+//       gender,
+//       state,
+//       city,
+//       address,
+//       password,
+//     } = req.body;
+
+//     // Validate input
+//     if (
+//       !firstName ||
+//       !lastName ||
+//       !birthday ||
+//       !phone ||
+//       !email ||
+//       !gender ||
+//       !state ||
+//       !city ||
+//       !address ||
+//       !password
+//     ) {
+//       return res.status(400).json({ error: "All fields are required" });
+//     }
+//  // {
+//     //   "UserName":"manish@gmail.com",
+//     //   "password":"Manish@1#2"
+//     //  }
+//     // Check if the Phone is already registered
+//     //   const existingUser = await User.findOne({ phone });
+//     //   if (existingUser) {
+//     //     return res.status(400).json({ error: 'Phone No already exists' });
+//     //   }
+
+//     // Hash the password
+//     const hashedPassword = await bcrypt.hash(password, 10); // 10 salt rounds
+//     // Parse birthday if it's a string
+//     const parsedBirthday = new Date(birthday); // Ensure the birthday is a Date object
+//     // Create new user
+    
+//     const newUser = new Customer({
+//       firstName,
+//       lastName,
+//       birthday: parsedBirthday,
+//       phone,
+//       email,
+//       gender,
+//       state,
+//       city,
+//       address,
+//       password: hashedPassword, // Store the hashed password
+//     });
+
+//     // Save the user to the database
+//     await newUser.save();
+
+//     // Return success response
+//     res.status(201).json({ message: "User created successfully" });
+//   } catch (error) {
+//     console.error("Error creating user:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+
+
+const UserRegister = async (req, res) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      birthday,
+      phone,
+      email,
+      gender,
+      state,
+      city,
+      address,
+      password,
+    } = req.body;
+
+    // Validate input
+    if (
+      !firstName ||
+      !lastName ||
+      !birthday ||
+      !phone ||
+      !email ||
+      !gender ||
+      !state ||
+      !city ||
+      !address ||
+      !password
+    ) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    // Check if the phone or email is already registered
+    const existingUser = await Customer.findOne({ $or: [{ phone }, { email }] });
+    if (existingUser) {
+      return res.status(400).json({
+        error: `User with ${
+          existingUser.phone === phone ? "phone" : "email"
+        } already exists`,
+      });
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Parse birthday if it's a string
+    const parsedBirthday = new Date(birthday);
+
+    // Create new user
+    const newUser = new Customer({
+      firstName,
+      lastName,
+      birthday: parsedBirthday,
+      phone,
+      email,
+      gender,
+      state,
+      city,
+      address,
+      password: hashedPassword,
+    });
+
+    // Save the user to the database
+    await newUser.save();
+
+    // Return success response
+    res.status(201).json({ message: "User created successfully" });
+  } catch (error) {
+    // Handle MongoDB duplicate key error
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0]; // Get the field causing the error
+      return res.status(400).json({
+        error: `User with this ${field} already exists`,
+      });
+    }
+
+    console.error("Error creating user:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+module.exports = { UserLogin, UserRegister };
