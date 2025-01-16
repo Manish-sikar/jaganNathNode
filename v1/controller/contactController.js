@@ -8,10 +8,7 @@ const updateContactData = async (req, res) => {
     const status = 1; // Status is hardcoded, no need to check it
 
 
-      // Validate that `mob_no` is an array of strings
-      if (!Array.isArray(mob_no) || !mob_no.every(num => typeof num === "string")) {
-        return res.status(400).json({ message: "Invalid format for mobile numbers." });
-      }
+   
 
     // Validate required fields
     if (!address_name || !address_link  || !email || !iframe_link) {
