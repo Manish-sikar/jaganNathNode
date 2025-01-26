@@ -21,7 +21,7 @@ const { postContactForm, getContactForm, deleteContactForm } = require("../contr
 const { postServicesData, getServicesData, updateServicesData, deleteServicesData, changeStatusServicesData } = require("../controller/servicesController");
 const { postProjectsData, getProjectsData, updateProjectsData, deleteProjectsData, changeStatusProjectsData } = require("../controller/projectsController");
 const { postTeamData, getTeamData, updateTeamData, deleteTeamData, changeStatusTeamData } = require("../controller/teamController");
-const { UserLogin, UserRegister } = require("../controller/userAuthController");
+const { PartnerLogin, PartnerRegister, GetPartnerRegister } = require("../controller/userAuthController");
 const { postUserApplyForm, getUserApplyForm } = require("../controller/applyFormController");
 
 
@@ -49,8 +49,10 @@ const storage = multer.diskStorage({
 
 
     // User routes
-    router.post("/User-login", UserLogin);
-    router.post("/User-reg", UserRegister);
+    router.post("/User-login", PartnerLogin);
+    router.post("/User-reg", PartnerRegister);
+    router.get("/User-reg", GetPartnerRegister);
+
   // site setting Routes
   router.put(
     "/site_setting",
