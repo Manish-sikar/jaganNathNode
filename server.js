@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 app.use(express.json())
 app.use(cors());
 app.use(express.static(path.join(__dirname, "public")));
-app.use('/api/admin/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/admin/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 app.use("/api/admin", userRouter);
 
