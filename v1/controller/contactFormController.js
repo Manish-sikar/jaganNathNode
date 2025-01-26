@@ -2,42 +2,39 @@ const ContactFormModel = require("../models/contactFormModel");
 
 const postContactForm = async (req, res) => {
   try {
-    const { contact_name, contact_email, contact_project, contact_message } =
-      req.body;
+    const { fullName, designation, email, mobile, institutionName, message } = req.body;
     const status = 1;
+
     // Validate required fields
-    if (
-      !contact_name ||
-      !contact_email ||
-      !contact_project ||
-      !contact_message
-    ) {
+    if (!fullName || !designation || !email || !mobile || !institutionName || !message) {
       return res.status(400).json({
-        err: "All fields are required, including  name, email, subject, and message.",
+        err: "All fields are required, including full name, designation, email, mobile, institution name, and message.",
       });
     }
 
-    // Create a new instance of TeamsModel
-    let contact_formData = ContactFormModel({
-      contact_name, // Use the resized image path for the logo
-      contact_email,
-      contact_project,
-      contact_message,
+    // Create a new instance of ContactFormModel
+    let contactFormData = new ContactFormModel({
+      fullName,
+      designation,
+      email,
+      mobile,
+      institutionName,
+      message,
       status,
     });
 
-    // Save the team data to the database
-    await contact_formData.save();
+    // Save the contact form data to the database
+    await contactFormData.save();
 
     // Send a success response
     return res.status(201).json({
-      message: "contact form data saved successfully in the database!",
+      message: "Contact form data saved successfully in the database!",
     });
   } catch (error) {
-    console.error("Error in postTeamData: ", error);
-    return res
-      .status(500)
-      .json({ err: "An error occurred while saving team data." });
+    console.error("Error in postContactForm: ", error);
+    return res.status(500).json({
+      err: "An error occurred while saving contact form data.",
+    });
   }
 };
 
