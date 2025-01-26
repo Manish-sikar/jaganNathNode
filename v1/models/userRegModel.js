@@ -1,53 +1,50 @@
-// models/UserModel.js
-
 const mongoose = require('mongoose');
 
-const customerSchema = new mongoose.Schema({
-  firstName: {
+// Define the Customer schema
+const partnerSchema = new mongoose.Schema({
+  fullName: {
     type: String,
     required: true,
   },
-  lastName: {
+  designation: {
     type: String,
     required: true,
-  },
-  birthday: {
-    type: String,
-    required: true,
-  },
-  phone: {
-    type: String,
-    required: true,
-    unique: true,
-
   },
   email: {
     type: String,
     required: true,
+    unique: true, // Ensures email is unique
+    match: [/\S+@\S+\.\S+/, 'Please provide a valid email'],
+  },
+  mobile: {
+    type: String,
+    required: true,
+    unique: true, // Ensures mobile number is unique
+  },
+  institutionName: {
+    type: String,
+    required: true,
+  },
+  message: {
+    type: String,
+    required: true,
+  },
+  panNo: {
+    type: String,
+    required: true,
     unique: true,
   },
-  gender: {
+  aadharNo: {
     type: String,
     required: true,
-  },
-  state: {
-    type: Number, // Can be mapped to a state ID or name, depending on your use case
-    required: true,
-  },
-  city: {
-    type: Number, // Similarly, can be mapped to city ID
-    required: true,
-  },
-  address: {
-    type: String,
-    required: true,
+    unique: true,
   },
   password: {
     type: String,
     required: true,
   },
-}, { timestamps: true });
+});
 
-const Customer = mongoose.model('Customer', customerSchema);
-
-module.exports = Customer;
+// Create and export the Partner model
+const Partner = mongoose.model('Partner', partnerSchema);
+module.exports = Partner;
