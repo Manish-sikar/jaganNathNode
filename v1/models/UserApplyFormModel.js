@@ -13,23 +13,41 @@ const UserApplyFormSchema = new mongoose.Schema({
     unique: true,
     lowercase: true,
   },
-  mobile: {
+  phone: {
     type: String,
     required: true,
     trim: true,
     match: [/^\d{10}$/, "Please enter a valid 10-digit phone number"],
   },
-  designation: {
+  panCard: {
+    type: String,
+    required: true,
+    trim: true,
+    unique: true,
+    uppercase: true,
+    match: [/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, "Please enter a valid PAN card number"],
+  },
+  state: {
     type: String,
     required: true,
     trim: true,
   },
-  institutionName: {
+  district: {
     type: String,
     required: true,
     trim: true,
   },
-  message: {
+  fullAddress: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  category: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  subCategory: {
     type: String,
     required: true,
     trim: true,
