@@ -23,14 +23,23 @@ app.get("/", (req, res) => {
   res.send("Welcome to admin page Node Backend");
 });
 
-app.use('/api/admin/uploads', (req, res, next) => {
-  const filePath = path.join(__dirname, 'uploads', req.path);
-  if (fs.existsSync(filePath)) {
-    res.sendFile(filePath);
-  } else {
-    res.status(404).json({ error: 'File not found' });
+app.get('/api/admin/uploads/:filename', (req, res) => {
+  try {
+    const filename = decodeURIComponent(req.params.filename);
+    const filepath = path.join(__dirname, 'uploads', filename);
+
+    // Check if file exists
+    if (!fs.existsSync(filepath)) {
+      return res.status(404).send('File not found');
+    }
+
+    res.sendFile(filepath);
+  } catch (err) {
+    console.error('Error serving file:', err.message);
+    res.status(500).send('Internal Server Error');
   }
 });
+
 // Start the server
 app.listen(PORT, async () => {
   try {
