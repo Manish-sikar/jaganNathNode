@@ -11,13 +11,8 @@ const app = express();
 const PORT = process.env.PORT || 4041;
 
 app.use(bodyParser.json());
-app.use(express.json())
-const corsOptions = {
-  origin: 'https://www.jasnathfinance.in' || 'https://jagannathnode.onrender.com',
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type'],
-};
-app.use(cors(corsOptions));
+app.use(express.json());
+app.use(cors());
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use('/api/admin/uploads', express.static(path.join(__dirname, 'uploads')));
