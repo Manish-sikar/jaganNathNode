@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 4041;
 app.use(bodyParser.json());
 app.use(express.json())
 const corsOptions = {
-  origin: 'https://www.jasnathfinance.in',
+  origin: 'https://www.jasnathfinance.in' || 'https://jagannathnode.onrender.com',
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type'],
 };
