@@ -5,49 +5,36 @@ const postUserApplyForm = async (req, res) => {
     const {
       fullName,
       email,
-      phone,
-      panCard,
-      state,
-      district,
-      fullAddress,
-      category,
-      subCategory,
+      mobile,  // Changed from phone
+      designation,
+      institutionName,
+      message,
     } = req.body;
 
-    // Validate required fields
     if (
       !fullName ||
       !email ||
-      !phone ||
-      !panCard ||
-      !state ||
-      !district ||
-      !fullAddress ||
-      !category ||
-      !subCategory
+      !mobile ||
+      !designation ||
+      !institutionName ||
+      !message
     ) {
       return res.status(400).json({
         err: "All fields are required.",
       });
     }
 
-    // Create a new instance of UserApplyFormModel
     const userForm = new UserApplyFormModel({
       fullName,
       email,
-      phone,
-      panCard,
-      state,
-      district,
-      fullAddress,
-      category,
-      subCategory,
+      phone: mobile,  // Mapping mobile to phone
+      designation,
+      institutionName,
+      message,
     });
 
-    // Save the data to the database
     await userForm.save();
 
-    // Send a success response
     return res.status(201).json({
       message: "User application form data saved successfully!",
     });
