@@ -4,6 +4,7 @@ const userRouter = require("./v1/routes/authRoutes");
 const path = require("path"); // Import the path module
 const cors = require("cors");
 const http = require("http");
+const fs = require("fs");
 const connectToDatabase = require("./database/mongoseConnection");
 require("dotenv").config();
 
