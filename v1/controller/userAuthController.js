@@ -36,7 +36,7 @@ const PartnerLogin = async (req, res) => {
     res.status(200).json({
       token,
       user_Id: user._id,
-      user_name: `${user.firstName} ${user.lastName}`,
+      user_name: user.fullName,
       email: user.email,
       phone: user.phone,
     });
