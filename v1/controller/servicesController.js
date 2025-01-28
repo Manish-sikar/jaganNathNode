@@ -2,38 +2,63 @@ const sharp = require("sharp");
 const path = require("path");
 const fs = require("fs");
 const ServicesModel = require("../models/serviceModel");
+const AWS = require("aws-sdk");
+const { v4: uuidv4 } = require("uuid");
 
+// Set up AWS S3
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+});
+/// Function to upload image to S3
+const uploadToS3 = async (fileBuffer, fileName) => {
+  const params = {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: `services/${fileName}`, // File path in S3 bucket
+    Body: fileBuffer, // Use the buffer of the file
+    ContentType: "image/jpeg", // Assuming the image is in JPEG format
+    ACL: "public-read", // Allow public access to the image
+  };
+
+  const { Location } = await s3.upload(params).promise();
+  return Location; // Return the URL of the uploaded image
+};
+
+// Save service data and upload logo to S3
 const postServicesData = async (req, res) => {
   try {
-    const { card_title,   btn_link } = req.body;
+    const { card_title, btn_link } = req.body;
     const status = 1;
+
     // Check if the card logo file exists
     if (!req.file) {
       return res.status(400).json({ err: "Card Logo is required." });
     }
 
-    const imagePath = req.file.path; // Original image path
-
-    // Resize the image to 1920x1080 using Sharp
-    const resizedImagePath = path.join(
-      "uploads",
-      `resized_${req.file.filename}`
-    ); // Define a new path for resized image
-
-    await sharp(imagePath)
-      .resize(150, 150) // Set width and height
-      .toFile(resizedImagePath); // Save resized image to a new file
+    const fileBuffer = req.file.buffer; // Access the file buffer since it's stored in memory
 
     // Validate required fields
-    if (!card_title ||  !btn_link || !status) {
+    if (!card_title || !btn_link || !status) {
       return res.status(400).json({
-        err: "All fields are required, including card title, description, button text, and status.",
+        err: "All fields are required, including card title, button link, and status.",
       });
     }
 
+    // Generate a unique file name
+    const fileName = `${uuidv4()}.jpg`;
+
+    // Resize the image buffer before uploading it to S3
+    const resizedBuffer = await sharp(fileBuffer)
+      .resize(150, 150) // Resize before uploading
+      .toBuffer(); // Convert image to buffer
+
+    // Upload the resized image to S3 and get the image URL
+    const imageUrl = await uploadToS3(resizedBuffer, fileName);
+
     // Create a new instance of ServicesModel (assuming ServicesModel is your schema/model for this)
-    let servicesData = new ServicesModel({
-      card_logo: resizedImagePath, // Use the resized image path for the logo
+    const servicesData = new ServicesModel({
+      card_logo: imageUrl, // Use the URL of the uploaded image
       card_title,
       btn_link,
       status,
@@ -48,9 +73,9 @@ const postServicesData = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in postServicesData: ", error);
-    return res
-      .status(500)
-      .json({ err: "An error occurred while saving service data." });
+    return res.status(500).json({
+      err: "An error occurred while saving service data.",
+    });
   }
 };
 
@@ -71,11 +96,31 @@ const getServicesData = async (req, res) => {
   }
 };
 
+// Function to delete file from S3
+const deleteFileFromS3 = async (fileUrl) => {
+  const key = fileUrl.split("/").pop(); // Extract file name from the URL
+
+  const params = {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: `services/${key}`,
+  };
+
+  try {
+    await s3.deleteObject(params).promise();
+    console.log("File deleted successfully from S3");
+  } catch (error) {
+    console.error("Error deleting file from S3:", error);
+  }
+};
+
+// Update service data
 const updateServicesData = async (req, res) => {
   try {
-    const { card_title,   btn_link, _id } = req.body;
+    const { card_title, btn_link, _id } = req.body;
     if (!_id) {
-      return res.status(400).json({ err: "ID is required to update the data." });
+      return res
+        .status(400)
+        .json({ err: "ID is required to update the data." });
     }
 
     const servicesData = await ServicesModel.findById(_id);
@@ -83,17 +128,24 @@ const updateServicesData = async (req, res) => {
       return res.status(404).json({ err: "ID not found." });
     }
 
-    let resizedImagePath = servicesData.card_logo; // Default to existing image path
+    let resizedImagePath = servicesData.card_logo; // Default to existing image URL
 
     if (req.file) {
-      const imagePath = req.file.path;
-      resizedImagePath = path.join("uploads", `resized_${req.file.filename}`);
-      await sharp(imagePath)
-        .resize(150, 150)
-        .toFile(resizedImagePath);
+      const fileBuffer = req.file.buffer; // Use the buffer directly from memory
+
+      // Resize the image buffer before uploading it to S3
+      const resizedBuffer = await sharp(fileBuffer).resize(150, 150).toBuffer();
+
+      // Generate a unique file name for the image
+      const fileName = `${uuidv4()}.jpg`;
+
+      // Upload the resized image to S3 and get the URL
+      const imageUrl = await uploadToS3(resizedBuffer, fileName);
+
+      resizedImagePath = imageUrl; // Update image URL
     }
 
-    if (!card_title || !btn_link ) {
+    if (!card_title || !btn_link) {
       return res.status(400).json({
         err: "All fields are required.",
       });
@@ -102,7 +154,7 @@ const updateServicesData = async (req, res) => {
     const updateData = {
       card_title,
       btn_link,
-      card_logo: resizedImagePath, // Use resized image path
+      card_logo: resizedImagePath,
       updatedAt: Date.now(),
     };
 
@@ -117,44 +169,34 @@ const updateServicesData = async (req, res) => {
       data: updatedServicesData,
     });
   } catch (error) {
-    console.error("Error updating Service data:", error);
+    console.error("Error updating service data:", error);
     return res.status(500).json({ err: "An error occurred." });
   }
 };
 
-
+// Delete service data
 const deleteServicesData = async (req, res) => {
   try {
-    // Destructure data from req.body (form fields)
     const _id = req.params.id;
-    // Validate required fields
     if (!_id) {
       return res.status(400).json({ err: "Service ID is required!" });
     }
 
-    // Find the existing service data by ID and delete it
+    // Find and delete the service data
     const servicesData = await ServicesModel.findByIdAndDelete(_id);
 
-    // Check if the service data exists
     if (!servicesData) {
       return res.status(404).json({ error: "Service data not found!" });
     }
 
-    // Construct the full path to the image file
-    const fullImagePath = path.join(__dirname, "..", servicesData.card_logo); // Adjust the path as needed
+    // If using AWS S3, delete the associated image from the S3 bucket
+    if (servicesData.card_logo) {
+      await deleteFileFromS3(servicesData.card_logo);
+    }
 
-    // Delete the associated image file
-    fs.unlink(fullImagePath, (err) => {
-      if (err) {
-        console.error(`Error deleting image file: ${fullImagePath}`, err);
-        // Optionally log this error but still return the success response
-      }
-    });
-
-    // Send a success response
     return res.status(200).json({
       message: "Service data and associated image deleted successfully!",
-      data: servicesData, // Return the deleted service data
+      data: servicesData,
     });
   } catch (error) {
     console.error("Error deleting services data:", error);
