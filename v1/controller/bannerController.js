@@ -21,7 +21,7 @@ const postBannerData = async (req, res) => {
       `resized_${req.file.filename}`
     ); // Define a new path for resized image
     await sharp(imagePath)
-      .resize(1450, 850) // Set width and height
+      .resize(1920, 1080) // Set width and height
       .toFile(resizedImagePath); // Save resized image to a new file
 
     // Update req.file.path to point to the resized image
@@ -94,7 +94,7 @@ const updateBannerData = async (req, res) => {
       ); // Define a new path for resized image
 
       await sharp(imagePath)
-        .resize(1450, 850) // Set width and height
+        .resize(1920, 1080) // Set width and height
         .toFile(resizedImagePath); // Save resized image to a new file
 
       // Set the updated banner image path
