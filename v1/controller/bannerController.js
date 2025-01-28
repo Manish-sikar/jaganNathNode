@@ -85,10 +85,10 @@ const postBannerData = async (req, res) => {
     }
 
     // Resize the image using Sharp
-    const resizedImageBuffer = await sharp(req.file.buffer)
-      .resize(1650, 670) // Set dimensions
-      .toFormat("jpeg")
-      .toBuffer();
+    // const resizedImageBuffer = await sharp(req.file.buffer)
+    //   .resize(1650, 670) // Set dimensions
+    //   .toFormat("jpeg")
+    //   .toBuffer();
 
     // Generate a unique filename
     const uniqueFilename = `resized_${Date.now()}_${uuidv4()}.jpeg`;
@@ -103,7 +103,7 @@ const postBannerData = async (req, res) => {
     const uploadParams = {
       Bucket: process.env.AWS_BUCKET_NAME, // S3 Bucket Name
       Key: `banners/${uniqueFilename}`, // File path in S3
-      Body: resizedImageBuffer,
+      Body: req.file.buffer,
       ContentType: "image/jpeg",
       ACL: "public-read", // Make file public
     };
@@ -181,10 +181,10 @@ const updateBannerData = async (req, res) => {
     // Check if a new image was uploaded
     if (req.file) {
       // Resize image using Sharp
-      const resizedImageBuffer = await sharp(req.file.buffer)
-        .resize(1650, 670)
-        .toFormat("jpeg")
-        .toBuffer();
+      // const resizedImageBuffer = await sharp(req.file.buffer)
+      //   .resize(1650, 670)
+      //   .toFormat("jpeg")
+      //   .toBuffer();
 
       // Generate a unique filename for the new image
       const uniqueFilename = `resized_${Date.now()}_${uuidv4()}.jpeg`;
@@ -193,7 +193,7 @@ const updateBannerData = async (req, res) => {
       const uploadParams = {
         Bucket: process.env.AWS_BUCKET_NAME, // S3 Bucket Name
         Key: `banners/${uniqueFilename}`, // File path in S3
-        Body: resizedImageBuffer,
+        Body: req.file.buffer,
         ContentType: "image/jpeg",
         ACL: "public-read", // Make file public
       };
