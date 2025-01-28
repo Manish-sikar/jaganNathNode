@@ -31,18 +31,9 @@ const { postUserApplyForm, getUserApplyForm } = require("../controller/applyForm
 
 
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, process.env.IMG_DIR_PATH); // Specify the directory for file storage
-    },
-    filename: (req, file, cb) => {
-      // Generate a unique filename using a timestamp and the original file name
-      const uniqueFilename = Date.now() + "-" + file.originalname;
-      req.fileName = uniqueFilename;
-      cb(null, uniqueFilename);
-    },
-  });
-  const upload = multer({ storage: storage });
+ // Multer configuration
+const storage = multer.memoryStorage(); // Store files in memory
+const upload = multer({ storage: storage });
 
 
 
