@@ -9,10 +9,12 @@ const updateFooterData = async (req, res) => {
       footer_title,
       footer_desc,
       footer_social_details,
-      footer_services,
+      footer_our_services,
+      footer_other_services,
+      footer_banking_services,
       footer_address1,
       footer_address2,
-      footer_email  // Include address_link if needed
+      footer_email
     } = req.body;
 
     // Validate required fields
@@ -21,13 +23,15 @@ const updateFooterData = async (req, res) => {
       !footer_title ||
       !footer_desc ||
       !footer_social_details ||
-      !footer_services ||
-      ! footer_address1 || 
-      ! footer_address2 || 
-      ! footer_email 
+      !footer_our_services ||
+      !footer_other_services ||
+      !footer_banking_services ||
+      !footer_address1 ||
+      !footer_address2 ||
+      !footer_email
     ) {
       return res.status(400).json({
-        err: "All fields are required, including _id, footer_title, footer_desc, footer_social_details, footer_services, and footer_contacts.",
+        err: "All fields are required, including _id, footer_title, footer_desc, footer_social_details, footer_our_services, footer_other_services, footer_banking_services, footer_address1, footer_address2, and footer_email."
       });
     }
 
@@ -36,11 +40,13 @@ const updateFooterData = async (req, res) => {
       footer_title,
       footer_desc,
       footer_social_details,
-      footer_services,
+      footer_our_services,
+      footer_other_services,
+      footer_banking_services,
       footer_address1,
-      footer_address2 ,
-      footer_email ,
-      updatedAt: Date.now(), // Update the timestamp
+      footer_address2,
+      footer_email,
+      updatedAt: Date.now() // Update the timestamp
     };
 
     // Update the footer data
@@ -53,19 +59,19 @@ const updateFooterData = async (req, res) => {
     // Check if the update was successful
     if (!updatedFooterData) {
       return res.status(404).json({
-        err: "Footer data not found.",
+        err: "Footer data not found."
       });
     }
 
     // Send a success response with the updated data
     return res.status(200).json({
       message: "Footer details updated successfully!",
-      data: updatedFooterData, // Corrected to the proper variable
+      data: updatedFooterData
     });
   } catch (error) {
     console.error("Error updating footer data:", error);
     return res.status(500).json({
-      err: "An error occurred, unable to update footer details.",
+      err: "An error occurred, unable to update footer details."
     });
   }
 };
