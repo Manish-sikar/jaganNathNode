@@ -24,6 +24,7 @@ const { postProjectsData, getProjectsData, updateProjectsData, deleteProjectsDat
 const { postTeamData, getTeamData, updateTeamData, deleteTeamData, changeStatusTeamData } = require("../controller/teamController");
 const { PartnerLogin, PartnerRegister, GetPartnerRegister } = require("../controller/userAuthController");
 const { postUserApplyForm, getUserApplyForm } = require("../controller/applyFormController");
+const { postLoanData, getLoanData, updateLoanData, deleteLoanData, changeStatusLoanData } = require("../controller/loanDataController");
 
 
 
@@ -158,7 +159,19 @@ router.put(
 router.post("/user_apply_form", postUserApplyForm);
 router.get("/user_apply_form", getUserApplyForm);
 // router.delete("/contact_form/:id", deleteContactForm );
- 
+
+
+// Loan Servies apis routes
+router.post("/loan_details", upload.single("loanimg"), postLoanData);
+router.get("/loan_details", getLoanData);
+router.put(
+  "/loan_details",
+  upload.single("loanimg"),
+  updateLoanData
+);
+router.delete("/loan_details/:id", deleteLoanData);
+router.put("/loan_details/chanege_status", changeStatusLoanData);
+
 
 
 module.exports = router;
