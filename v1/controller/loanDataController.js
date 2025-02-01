@@ -36,10 +36,12 @@ const postLoanData = async (req, res) => {
 
     let imageUrl = null;
     if (req.file) {
-      const resizedBuffer = await sharp(req.file.buffer).resize(150, 150).toBuffer();
+      const resizedBuffer = req.file.buffer ;
       const fileName = `${uuidv4()}.jpg`;
       imageUrl = await uploadToS3(resizedBuffer, fileName);
     }
+    
+
 
     const loanData = new LoanModel({
       icon_pic: imageUrl,
@@ -81,9 +83,8 @@ const updateLoanData = async (req, res) => {
 
     let imageUrl = loan.icon_pic; // Keep existing image
     if (req.file) {
-      const resizedBuffer = await sharp(req.file.buffer).resize(150, 150).toBuffer();
       const fileName = `${uuidv4()}.jpg`;
-      imageUrl = await uploadToS3(resizedBuffer, fileName);
+      imageUrl = await uploadToS3(req.file.buffer, fileName);
     }
 
     const updatedLoan = await LoanModel.findByIdAndUpdate(
