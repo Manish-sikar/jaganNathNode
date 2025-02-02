@@ -13,8 +13,8 @@ const s3 = new AWS.S3({
     const postUserApplyForm = async (req, res) => {
 
   try {
-    console.log(req.body);
     const {
+      partnerEmail,
       fullName,
       email,
       phone,
@@ -28,6 +28,7 @@ const s3 = new AWS.S3({
 
     // Validate required fields
     if (
+      !partnerEmail ||
       !fullName ||
       !email ||
       !phone ||
@@ -78,6 +79,7 @@ const s3 = new AWS.S3({
 
     // Create a new instance of UserApplyFormModel
     const userForm = new UserApplyFormModel({
+      partnerEmail,
       fullName,
       email,
       phone,
