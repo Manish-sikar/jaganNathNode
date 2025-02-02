@@ -22,8 +22,8 @@ const { postServicesData, getServicesData, updateServicesData, deleteServicesDat
 const { postProjectsData, getProjectsData, updateProjectsData, deleteProjectsData, changeStatusProjectsData } = require("../controller/projectsController");
 const { postTeamData, getTeamData, updateTeamData, deleteTeamData, changeStatusTeamData } = require("../controller/teamController");
 const { PartnerLogin, PartnerRegister, GetPartnerRegister, updatePartnerRegister, deletePartnerRegister, changePassPartnerRegister } = require("../controller/userAuthController");
-const { postUserApplyForm, getUserApplyForm } = require("../controller/applyFormController");
 const { postLoanData, getLoanData, updateLoanData, deleteLoanData, changeStatusLoanData } = require("../controller/loanDataController");
+const { postUserApplyForm, getUserApplyForm, deleteUserApplyForm, updateUserApplyForm } = require("../controller/applyFormController");
 
 
 
@@ -163,10 +163,26 @@ router.put(
   changeStatusTeamData
 );
 
+ 
 // user Apply loan form
-router.post("/user_apply_form", postUserApplyForm);
+router.post("/user_apply_form", upload.fields([
+  { name: "document1", maxCount: 1 },
+  { name: "document2", maxCount: 1 },
+  { name: "document3", maxCount: 1 }
+]), postUserApplyForm)
 router.get("/user_apply_form", getUserApplyForm);
+router.delete("/user_apply_form/:id", deleteUserApplyForm);
+router.post(
+  "/user_apply_form/:id",
+  upload.fields([
+    { name: "document1", maxCount: 1 },
+    { name: "document2", maxCount: 1 },
+    { name: "document3", maxCount: 1 },
+  ]),
+  updateUserApplyForm
+);
 // router.delete("/contact_form/:id", deleteContactForm );
+ 
  
 
 
