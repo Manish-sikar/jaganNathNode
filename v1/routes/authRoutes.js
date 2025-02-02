@@ -6,7 +6,6 @@ const {
 const router = require("express").Router();
 
 const multer = require("multer");
-const path = require("path");
 const {
   postSocialMedia,
   getSocialMedia,
@@ -22,7 +21,7 @@ const { postContactForm, getContactForm, deleteContactForm } = require("../contr
 const { postServicesData, getServicesData, updateServicesData, deleteServicesData, changeStatusServicesData } = require("../controller/servicesController");
 const { postProjectsData, getProjectsData, updateProjectsData, deleteProjectsData, changeStatusProjectsData } = require("../controller/projectsController");
 const { postTeamData, getTeamData, updateTeamData, deleteTeamData, changeStatusTeamData } = require("../controller/teamController");
-const { PartnerLogin, PartnerRegister, GetPartnerRegister } = require("../controller/userAuthController");
+const { PartnerLogin, PartnerRegister, GetPartnerRegister, updatePartnerRegister, deletePartnerRegister, changePassPartnerRegister } = require("../controller/userAuthController");
 const { postUserApplyForm, getUserApplyForm } = require("../controller/applyFormController");
 const { postLoanData, getLoanData, updateLoanData, deleteLoanData, changeStatusLoanData } = require("../controller/loanDataController");
 
@@ -31,17 +30,23 @@ const { postLoanData, getLoanData, updateLoanData, deleteLoanData, changeStatusL
 
 
 
+// const storage = multer.diskStorage({
+//     destination: (req, file, cb) => {
+//       cb(null, process.env.IMG_DIR_PATH); // Specify the directory for file storage
+//     },
+//     filename: (req, file, cb) => {
+//       // Generate a unique filename using a timestamp and the original file name
+//       const uniqueFilename = Date.now() + "-" + file.originalname;
+//       req.fileName = uniqueFilename;
+//       cb(null, uniqueFilename);
+//     },
+//   });
+//   const upload = multer({ storage: storage });
 
- // Multer configuration
+
+// Multer configuration
 const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage: storage });
-
-
-
-
-
-
-
   
   // admin routes
   router.post("/login", AdminLogin);
@@ -49,11 +54,14 @@ const upload = multer({ storage: storage });
   
 
 
-    // User routes
+    // User Partner routes
     router.post("/User-login", PartnerLogin);
     router.post("/User-reg", PartnerRegister);
     router.get("/User-reg", GetPartnerRegister);
-
+    router.put("/update-User-reg", updatePartnerRegister);
+    router.post("/delete-User-reg/:id", deletePartnerRegister);
+    router.post("/change-pass-User-reg", changePassPartnerRegister);
+    
   // site setting Routes
   router.put(
     "/site_setting",
@@ -159,6 +167,7 @@ router.put(
 router.post("/user_apply_form", postUserApplyForm);
 router.get("/user_apply_form", getUserApplyForm);
 // router.delete("/contact_form/:id", deleteContactForm );
+ 
 
 
 // Loan Servies apis routes
@@ -171,6 +180,7 @@ router.put(
 );
 router.delete("/loan_details/:id", deleteLoanData);
 router.put("/loan_details/chanege_status", changeStatusLoanData);
+
 
 
 
