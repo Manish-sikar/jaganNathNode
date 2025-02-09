@@ -43,6 +43,11 @@ const partnerSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+    JN_Id: {
+    type: String,
+    required: true,
+    unique:true
+  },
 });
 
 // Create and export the Partner model
