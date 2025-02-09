@@ -31,5 +31,13 @@ const comparePassword = async (enteredPassword, hashedPassword) => {
   return await bcrypt.compare(enteredPassword, hashedPassword);
 };
 
+async function randomNumber(length = 6) {
+  const numbers = "1234567890"; // Use only 0-9 to ensure numeric output
+  let result = ""; // Initialize result as an empty string
+  for (let i = length; i > 0; i -= 1) {
+    result += numbers[Math.floor(Math.random() * numbers.length)]; // Use Math.floor to ensure index is an integer
+  }
+  return result;
+}
 
-module.exports = { JwtCreate, hashPassword, comparePassword };
+module.exports = { JwtCreate, hashPassword, comparePassword ,randomNumber };
