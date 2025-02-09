@@ -1,4 +1,4 @@
-const { comparePassword, JwtCreate } = require("../services/authServices");
+const { comparePassword, JwtCreate ,randomNumber} = require("../services/authServices");
 const bcrypt = require("bcrypt");
 const Partner = require("../models/userRegModel");
 
@@ -183,6 +183,7 @@ const PartnerRegister = async (req, res) => {
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
+    const JN_Id = await randomNumber()
 
     // Create new user
     const newUser = new Partner({
@@ -194,6 +195,7 @@ const PartnerRegister = async (req, res) => {
       message,
       panNo,
       aadharNo,
+       JN_Id,
       password: hashedPassword,
     });
 
