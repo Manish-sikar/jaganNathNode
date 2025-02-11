@@ -48,13 +48,11 @@ const storeOTP = async (email, otp) => {
   
       // Email options
       const mailOptions = {
-        from: '"DIGITAL PAY MONEY" <no-reply@digitalpay.com>',
+        from: '"Jashnath Finance" <no-reply@jashnatgfinance.in>',
         to: email,
-        subject: "DIGITAL PAY MONEY OTP USER VERIFICATION",
+        subject: "Jashnath Finance Change Password Verification",
         html: `<p>Your OTP is <b>${otp}</b>. It will expire in 5 minutes.</p>`,
       };
-  
-      console.log(mailOptions);
   
       // Send email
       await transporter.sendMail(mailOptions);
