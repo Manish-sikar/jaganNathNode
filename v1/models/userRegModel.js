@@ -43,7 +43,7 @@ const partnerSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-    JN_Id: {
+  JN_Id: {
     type: String,
     required: true,
     unique:true
