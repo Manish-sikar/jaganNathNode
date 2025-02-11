@@ -7,7 +7,7 @@ const Partner = require("../models/userRegModel");
 const PartnerLogin = async (req, res) => {
   try {
     const { emailORphone, password } = req.body;
-
+    
     // Validate input
     if (!emailORphone || !password) {
       return res.status(400).json({ error: "All fields are required" });
@@ -15,9 +15,8 @@ const PartnerLogin = async (req, res) => {
 
     // Find the user by either email or phone
     const user = await Partner.findOne({
-      $or: [{ email: emailORphone }, { phone: emailORphone }],
+      $or: [{ JN_Id: emailORphone }, { mobile: emailORphone }],
     });
-
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
