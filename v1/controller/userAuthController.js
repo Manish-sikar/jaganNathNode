@@ -194,7 +194,7 @@ const PartnerRegister = async (req, res) => {
       message,
       panNo,
       aadharNo,
-       JN_Id: `POS${JN_ID}`,
+       JN_Id: `POS${JN_Id}`,
       password: hashedPassword,
     });
 
