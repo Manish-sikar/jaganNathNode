@@ -42,11 +42,7 @@ const s3 = new AWS.S3({
       return res.status(400).json({ err: "All fields are required." });
     }
 
-    if (!req.files || Object.keys(req.files).length === 0) {
-      return res
-        .status(400)
-        .json({ err: "At least one document is required." });
-    }
+ 
 
     const uploadFileToS3 = async (file, folder) => {
       if (!file) return null; // If no file is provided, return null
