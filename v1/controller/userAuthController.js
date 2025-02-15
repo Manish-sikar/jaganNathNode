@@ -36,7 +36,7 @@ const PartnerLogin = async (req, res) => {
       token,
       user_Id: user._id,
       user_name: user.fullName,
-      email: user.email,
+      email: user.JN_Id,
       phone: user.phone,
     });
   } catch (error) {
