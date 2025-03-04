@@ -37,6 +37,7 @@ const PartnerLogin = async (req, res) => {
       user_Id: user._id,
       user_name: user.fullName,
       email: user.JN_Id,
+       user_balance: user.balance,
       phone: user.phone,
     });
   } catch (error) {
@@ -144,7 +145,6 @@ const PartnerLogin = async (req, res) => {
 //   }
 // };
 
-
 const PartnerRegister = async (req, res) => {
   try {
     const { fullName, designation, email, mobile, institutionName, message, panNo, aadharNo, password } = req.body;
@@ -183,20 +183,27 @@ const PartnerRegister = async (req, res) => {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
     const JN_Id = await randomNumber()
-
     // Create new user
     const newUser = new Partner({
       fullName,
       designation,
       email,
       mobile,
+      balance:0,
       institutionName,
       message,
       panNo,
       aadharNo,
-       JN_Id: `POS${JN_Id}`,
+      JN_Id,
       password: hashedPassword,
     });
+
+
+    const result = await Partner.updateMany(
+      { balance: { $exists: false } }, // Find users without a balance
+      { $set: { balance: "0" } } // Set balance to "0"
+    );
+    console.log(result)
 
     // Save the user to the database
     await newUser.save();
