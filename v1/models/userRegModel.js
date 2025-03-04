@@ -21,6 +21,11 @@ const partnerSchema = new mongoose.Schema({
     required: true,
     unique: true, // Ensures mobile number is unique
   },
+  balance: {
+    type: String,
+    required: true,
+    default: "0", // Default balance set to "0"
+  },
   institutionName: {
     type: String,
     required: true,
