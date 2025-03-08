@@ -1,5 +1,6 @@
 const UserApplyFormModel = require("../models/UserApplyFormModel");
-
+const Partner = require("../models/userRegModel");
+const TransactionHistory = require("../models/TransactionHistory");
 const AWS = require("aws-sdk");
 const { v4: uuidv4 } = require("uuid");
 
@@ -10,8 +11,7 @@ const s3 = new AWS.S3({
   region: process.env.AWS_REGION,
 });
 
-    const postUserApplyForm = async (req, res) => {
-
+   const postUserApplyForm = async (req, res) => {
   try {
     const {
       partnerEmail,
@@ -24,6 +24,7 @@ const s3 = new AWS.S3({
       fullAddress,
       category,
       subCategory,
+      amount,
     } = req.body;
 
     // Validate required fields
@@ -37,13 +38,34 @@ const s3 = new AWS.S3({
       !district ||
       !fullAddress ||
       !category ||
-      !subCategory
+      !subCategory ||
+      !amount
     ) {
       return res.status(400).json({ err: "All fields are required." });
     }
+    const newpartnerEmail = partnerEmail.replace(/\D/g, "");
+    // Fetch partner data using JN_Id instead of ID
+    const partnerData = await Partner.findOne({ JN_Id: newpartnerEmail });
 
- 
+    if (!partnerData) {
+      return res.status(404).json({ err: "Partner not found." });
+    }
 
+    let AvailableBalance = Number(partnerData?.balance) || 0;
+    // Validate available balance
+    if (AvailableBalance < amount) {
+      return res
+        .status(400)
+        .json({ err: "Insufficient balance. Try again later." });
+    }
+
+    // Deduct balance before processing further
+    const updatedBalance = AvailableBalance - amount;
+   const ducductdata =  await Partner.findOneAndUpdate(
+      { JN_Id: newpartnerEmail },
+      { balance: updatedBalance },
+      { new: true }
+    );
     const uploadFileToS3 = async (file, folder) => {
       if (!file) return null; // If no file is provided, return null
 
@@ -93,13 +115,32 @@ const s3 = new AWS.S3({
     // Save the data to the database
     await userForm.save();
 
+    if (AvailableBalance < amount) {
+      const deductBalance = AvailableBalance - amount;
+
+      await Partner.findByIdAndUpdate(
+        { JN_Id: partnerEmail },
+        {
+          balance: deductBalance,
+        },
+        { new: true }
+      );
+    }
+
+
+     // Save transaction history
+     const transaction = new TransactionHistory({
+      JN_Id: newpartnerEmail,
+      amountDeducted: amount,
+      availableBalanceAfter: updatedBalance,
+      purpose: `Request for ${category}`,
+    });
+
+    await transaction.save(); // Save to DB
+
     return res.status(201).json({
       message: "User application form data saved successfully!",
-      documents: {
-        document1: document1Url,
-        document2: document2Url,
-        document3: document3Url,
-      },
+      user_balance :updatedBalance 
     });
   } catch (error) {
     console.error("Error in postUserApplyForm:", error);
@@ -108,7 +149,6 @@ const s3 = new AWS.S3({
       .json({ err: "An error occurred while processing the request." });
   }
 };
-
 const getUserApplyForm = async (req, res) => {
   try {
     // Retrieve all contact form details
