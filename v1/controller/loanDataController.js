@@ -27,10 +27,10 @@ const uploadToS3 = async (fileBuffer, fileName) => {
 // Create Loan Data
 const postLoanData = async (req, res) => {
   try {
-    const { category_name, sub_category_name, category, link } = req.body;
+    const { category_name, sub_category_name, category,amount , link } = req.body;
     const status = 1; // Default status to active
 
-    if (!category_name || !sub_category_name || !category || !link) {
+    if (!category_name || !sub_category_name || !category || !amount || !link) {
       return res.status(400).json({ error: "All fields are required." });
     }
 
@@ -48,6 +48,7 @@ const postLoanData = async (req, res) => {
       category_name,
       sub_category_name,
       category,
+      amount,
       link,
       status,
     });
@@ -74,7 +75,7 @@ const getLoanData = async (req, res) => {
 // Update Loan Data
 const updateLoanData = async (req, res) => {
   try {
-    const { _id, category_name, sub_category_name, category, link } = req.body;
+    const { _id, category_name, sub_category_name, category,amount, link } = req.body;
 
     if (!_id) return res.status(400).json({ error: "Loan ID is required." });
 
@@ -89,7 +90,7 @@ const updateLoanData = async (req, res) => {
 
     const updatedLoan = await LoanModel.findByIdAndUpdate(
       _id,
-      { category_name, sub_category_name, category, link, icon_pic: imageUrl, updatedAt: Date.now() },
+      { category_name, sub_category_name, category,amount, link, icon_pic: imageUrl, updatedAt: Date.now() },
       { new: true }
     );
 
