@@ -11,6 +11,7 @@ require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 4041;
+const SOCKET_PORT = process.env.SOCKET_PORT || 4040;
 
 app.use(bodyParser.json());
 app.use(express.json());
