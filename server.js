@@ -5,6 +5,7 @@ const path = require("path"); // Import the path module
 const cors = require("cors");
 const http = require("http");
 const fs = require("fs");
+const { initializeSocketServer } = require("./v1/socket/socketServer.js");
 const connectToDatabase = require("./database/mongoseConnection");
 require("dotenv").config();
 
@@ -42,7 +43,15 @@ app.get('/api/admin/uploads/:filename', (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, async () => {
+initializeSocketServer(SOCKET_PORT);
+const server = http.createServer(app);
+// server.listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}.`);
+// });
+
+
+// Start the server
+server.listen(PORT, async () => {
   try {
     await connectToDatabase();
   } catch (error) {
