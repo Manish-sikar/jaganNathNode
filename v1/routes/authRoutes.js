@@ -21,7 +21,7 @@ const { postContactForm, getContactForm, deleteContactForm } = require("../contr
 const { postServicesData, getServicesData, updateServicesData, deleteServicesData, changeStatusServicesData } = require("../controller/servicesController");
 const { postProjectsData, getProjectsData, updateProjectsData, deleteProjectsData, changeStatusProjectsData } = require("../controller/projectsController");
 const { postTeamData, getTeamData, updateTeamData, deleteTeamData, changeStatusTeamData } = require("../controller/teamController");
-const { PartnerLogin, PartnerRegister, GetPartnerRegister, updatePartnerRegister, deletePartnerRegister, changePassPartnerRegister } = require("../controller/userAuthController");
+const { PartnerLogin, PartnerRegister, GetPartnerRegister, updatePartnerRegister, deletePartnerRegister, changePassPartnerRegister,GetSpecialpartnerData } = require("../controller/userAuthController");
 const { postLoanData, getLoanData, updateLoanData, deleteLoanData, changeStatusLoanData } = require("../controller/loanDataController");
 const { postUserApplyForm, getUserApplyForm, deleteUserApplyForm, updateUserApplyForm } = require("../controller/applyFormController");
 const { forgotPasswordSendOtp, UserRegisterverifyOtp, forgotChangePasswordUser } = require("../controller/forgotPasswordController");
@@ -59,6 +59,7 @@ const upload = multer({ storage: storage });
     router.post("/User-login", PartnerLogin);
     router.post("/User-reg", PartnerRegister);
     router.get("/User-reg", GetPartnerRegister);
+ router.post("/getSpeacialParthner", GetSpecialpartnerData);
     router.put("/update-User-reg", updatePartnerRegister);
     router.post("/delete-User-reg/:id", deletePartnerRegister);
     router.post("/change-pass-User-reg", changePassPartnerRegister);
