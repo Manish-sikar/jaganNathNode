@@ -318,9 +318,29 @@ const changePassPartnerRegister = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
  
+const GetSpecialpartnerData = async (req, res) => {
+try {
+  const { JN_Id } = req.body;;
+  const newJN_Id = JN_Id.replace(/\D/g, "");
+
+
+  const partnerDetails = await Partner.find({JN_Id:newJN_Id});
+  if (!partnerDetails) {
+    return res.status(404).json({ error: "Partner details are not found " });
+  }
+  res.status(200).json({
+    partner_Data: partnerDetails,
+    message: "Partner Details found sucessfully !! ",
+  });
+} catch (error) {
+  console.error("Error logging in:", error);
+  res.status(500).json({ error: "Internal server error" });
+}
+};
 
 
 module.exports = { PartnerLogin, PartnerRegister , GetPartnerRegister ,  updatePartnerRegister,
   deletePartnerRegister,
-  changePassPartnerRegister,};
+  changePassPartnerRegister,GetSpecialpartnerData};
