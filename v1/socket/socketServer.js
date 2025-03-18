@@ -17,9 +17,9 @@ const initializeSocketServer = (socketPort = 4040) => {
   // });
 
   // const server = http.createServer(app);
-const io = new Server(server, {
+const io = new Server(httpServer, {
   cors: {
-    origin: "*", // Adjust this for production with your frontend URL
+   origin: ["http://localhost:3000", "https://www.jasnathfinance.in"],
     methods: ["GET", "POST"]
   }
 });
