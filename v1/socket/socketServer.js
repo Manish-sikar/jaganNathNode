@@ -7,14 +7,22 @@ let onlineUser=0 ;
 
 const initializeSocketServer = (socketPort = 4040) => {
   const httpServer = require("http").createServer(); // Create HTTP Server
-  io = new Server(httpServer, {
-    cors: {
-      origin: ["http://localhost:3000",
-        "https://www.jasnathfinance.in",
-        "https://jasnathfinance.in"], // Replace with your React app's URL
-      methods: ["GET", "POST"],
-    },
-  });
+  // io = new Server(httpServer, {
+  //   cors: {
+  //     origin: ["http://localhost:3000",
+  //       "https://www.jasnathfinance.in",
+  //       "https://jasnathfinance.in"], // Replace with your React app's URL
+  //     methods: ["GET", "POST"],
+  //   },
+  // });
+
+  // const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Adjust this for production with your frontend URL
+    methods: ["GET", "POST"]
+  }
+});
 
   io.on("connection", (socket) => {
     onlineUser++
