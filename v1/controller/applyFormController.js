@@ -111,6 +111,7 @@ const s3 = new AWS.S3({
       document1: document1Url,
       document2: document2Url,
       document3: document3Url,
+       status:1
     });
 
     // Save the data to the database
