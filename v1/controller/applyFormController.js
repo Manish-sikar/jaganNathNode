@@ -16,7 +16,6 @@ const s3 = new AWS.S3({
 
 const postUserApplyForm = async (req, res) => {
   try {
-    console.log(req.body)
     const {
       partnerEmail,
       fullName,
