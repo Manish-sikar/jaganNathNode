@@ -1,60 +1,77 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-// Define the Customer schema
-const partnerSchema = new mongoose.Schema({
-  fullName: {
-    type: String,
-    required: true,
+const UserApplyFormSchema = new mongoose.Schema(
+  {
+    partnerEmail: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    fullName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    phone: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    panCard: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    state: {
+      type: String,
+      required: true,
+    },
+    district: {
+      type: String,
+      required: true,
+    },
+    fullAddress: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    category: {
+      type: String,
+      required: true,
+    },
+    subCategory: {
+      type: String,
+      required: true,
+    },
+    document1: {
+      type: String, // S3 URL
+      default: null,
+    },
+    document2: {
+      type: String, // S3 URL
+      default: null,
+    },
+    document3: {
+      type: String, // S3 URL
+      default: null,
+    },
+    status: {
+      type: String,
+      required: true,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
-  designation: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true, // Ensures email is unique
-    match: [/\S+@\S+\.\S+/, 'Please provide a valid email'],
-  },
-  mobile: {
-    type: String,
-    required: true,
-    unique: true, // Ensures mobile number is unique
-  },
-  balance: {
-    type: String,
-    required: true,
-    default: "0", // Default balance set to "0"
-  },
-  institutionName: {
-    type: String,
-    required: true,
-  },
-  message: {
-    type: String,
-    required: true,
-  },
-  panNo: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  aadharNo: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  JN_Id: {
-    type: String,
-    required: true,
-    unique:true
-  },
-});
+  { timestamps: true }
+);
 
-// Create and export the Partner model
-const Partner = mongoose.model('Partner', partnerSchema);
-module.exports = Partner;
+const UserApplyFormModel = mongoose.model("UserApplyForm", UserApplyFormSchema);
+module.exports = UserApplyFormModel;
