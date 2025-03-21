@@ -316,7 +316,9 @@ const changePassPartnerRegister = async (req, res) => {
 const GetSpecialpartnerData = async (req, res) => {
 try {
   const { JN_Id } = req.body;
+  console.log(JN_Id)
      const partnerData = await Partner.findOne({ JN_Id: JN_Id });
+  console.log(partnerData)
   if (!partnerDetails) {
     return res.status(404).json({ error: "Partner details are not found " });
   }
