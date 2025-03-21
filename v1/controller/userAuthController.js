@@ -320,13 +320,11 @@ const changePassPartnerRegister = async (req, res) => {
 };
 
  
+ 
 const GetSpecialpartnerData = async (req, res) => {
 try {
   const { JN_Id } = req.body;;
-  const newJN_Id = JN_Id.replace(/\D/g, "");
-
-
-  const partnerDetails = await Partner.find({JN_Id:newJN_Id});
+  const partnerDetails = await Partner.find({JN_Id:JN_Id});
   if (!partnerDetails) {
     return res.status(404).json({ error: "Partner details are not found " });
   }
