@@ -1,8 +1,10 @@
 const UserApplyFormModel = require("../models/UserApplyFormModel");
-const Partner = require("../models/userRegModel");
-const TransactionHistory = require("../models/TransactionHistory");
+
 const AWS = require("aws-sdk");
 const { v4: uuidv4 } = require("uuid");
+const LoanModel = require("../models/LoanDataModel");
+const Partner = require("../models/userRegModel");
+const TransactionHistory = require("../models/TransactionHistory");
 const { emitEvent } = require("../socket/socketServer");
 
 // AWS S3 Configuration
@@ -12,7 +14,7 @@ const s3 = new AWS.S3({
   region: process.env.AWS_REGION,
 });
 
-   const postUserApplyForm = async (req, res) => {
+const postUserApplyForm = async (req, res) => {
   try {
     const {
       partnerEmail,
@@ -27,7 +29,6 @@ const s3 = new AWS.S3({
       subCategory,
       amount,
     } = req.body;
-
     // Validate required fields
     if (
       !partnerEmail ||
@@ -100,7 +101,6 @@ const s3 = new AWS.S3({
         { partnerEmail }, // Match based on partnerEmail
         { $set: { status: 1 } }
       );
-
     // Create a new instance of UserApplyFormModel
     const userForm = new UserApplyFormModel({
       partnerEmail,
@@ -116,7 +116,7 @@ const s3 = new AWS.S3({
       document1: document1Url,
       document2: document2Url,
       document3: document3Url,
-       status:1
+      status:1
     });
 
     // Save the data to the database
@@ -143,8 +143,8 @@ const s3 = new AWS.S3({
       purpose: `Request for ${category}`,
     });
 
-    await transaction.save(); // Save to DB
- emitEvent("fetchWalletBalance", { message: "Wallet balance updated." });
+    await transaction.save(); // Save to DB    
+    emitEvent("fetchWalletBalance", { message: "Wallet balance updated." });
     return res.status(201).json({
       message: "User application form data saved successfully!",
       user_balance :updatedBalance 
@@ -156,6 +156,7 @@ const s3 = new AWS.S3({
       .json({ err: "An error occurred while processing the request." });
   }
 };
+
 const getUserApplyForm = async (req, res) => {
   try {
     // Retrieve all contact form details
@@ -234,15 +235,11 @@ const deleteUserApplyForm = async (req, res) => {
     });
   } catch (error) {
     console.error("Error deleting user application form:", error);
-    return res
-      .status(500)
-      .json({
-        err: "An error occurred, unable to delete user application form.",
-      });
+    return res.status(500).json({
+      err: "An error occurred, unable to delete user application form.",
+    });
   }
 };
-
-
 
 // const updateUserApplyForm = async (req, res) => {
 //   try {
@@ -353,8 +350,6 @@ const deleteUserApplyForm = async (req, res) => {
 //   }
 // };
 
-
-
 const updateUserApplyForm = async (req, res) => {
   try {
     const { id: _id } = req.params;
@@ -365,7 +360,9 @@ const updateUserApplyForm = async (req, res) => {
 
     const userForm = await UserApplyFormModel.findById(_id);
     if (!userForm) {
-      return res.status(404).json({ error: "User application form not found!" });
+      return res
+        .status(404)
+        .json({ error: "User application form not found!" });
     }
 
     const {
@@ -387,10 +384,12 @@ const updateUserApplyForm = async (req, res) => {
         const s3Key = fileUrl.split(`${process.env.AWS_BUCKET_NAME}/`)[1];
         if (s3Key) {
           try {
-            await s3.deleteObject({
-              Bucket: process.env.AWS_BUCKET_NAME,
-              Key: s3Key,
-            }).promise();
+            await s3
+              .deleteObject({
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: s3Key,
+              })
+              .promise();
           } catch (err) {
             console.error("Error deleting file from S3:", err);
           }
@@ -402,7 +401,9 @@ const updateUserApplyForm = async (req, res) => {
     const uploadFileToS3 = async (file, folder) => {
       if (!file) return null;
 
-      const uniqueFilename = `${folder}/${Date.now()}_${uuidv4()}_${file.originalname}`;
+      const uniqueFilename = `${folder}/${Date.now()}_${uuidv4()}_${
+        file.originalname
+      }`;
       const uploadParams = {
         Bucket: process.env.AWS_BUCKET_NAME,
         Key: uniqueFilename,
@@ -423,15 +424,24 @@ const updateUserApplyForm = async (req, res) => {
     if (req.files) {
       if (req.files["document1"]) {
         await deleteFileFromS3(userForm.document1);
-        document1Url = await uploadFileToS3(req.files["document1"][0], "documents");
+        document1Url = await uploadFileToS3(
+          req.files["document1"][0],
+          "documents"
+        );
       }
       if (req.files["document2"]) {
         await deleteFileFromS3(userForm.document2);
-        document2Url = await uploadFileToS3(req.files["document2"][0], "documents");
+        document2Url = await uploadFileToS3(
+          req.files["document2"][0],
+          "documents"
+        );
       }
       if (req.files["document3"]) {
         await deleteFileFromS3(userForm.document3);
-        document3Url = await uploadFileToS3(req.files["document3"][0], "documents");
+        document3Url = await uploadFileToS3(
+          req.files["document3"][0],
+          "documents"
+        );
       }
     }
 
@@ -459,14 +469,15 @@ const updateUserApplyForm = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating user application form:", error);
-    return res.status(500).json({ err: "An error occurred while updating the form." });
+    return res
+      .status(500)
+      .json({ err: "An error occurred while updating the form." });
   }
 };
-
 
 module.exports = {
   postUserApplyForm,
   getUserApplyForm,
   deleteUserApplyForm,
-  updateUserApplyForm
+  updateUserApplyForm,
 };
