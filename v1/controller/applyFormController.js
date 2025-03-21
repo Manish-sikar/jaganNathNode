@@ -96,6 +96,11 @@ const s3 = new AWS.S3({
       ? await uploadFileToS3(req.files["document3"][0], "documents")
       : null;
 
+      await UserApplyFormModel.updateMany(
+        { partnerEmail }, // Match based on partnerEmail
+        { $set: { status: 1 } }
+      );
+
     // Create a new instance of UserApplyFormModel
     const userForm = new UserApplyFormModel({
       partnerEmail,
