@@ -111,7 +111,10 @@ const postUserApplyForm = async (req, res) => {
       document3: document3Url,
       status:1
     });
-
+  await UserApplyFormModel.updateMany(
+      { partnerEmail }, // Match based on partnerEmail
+      { $set: { status: 1 } }
+    );
     // Save the data to the database
     await userForm.save();
 
