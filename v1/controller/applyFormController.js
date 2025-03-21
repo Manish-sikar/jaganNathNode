@@ -45,10 +45,7 @@ const postUserApplyForm = async (req, res) => {
     ) {
       return res.status(400).json({ err: "All fields are required." });
     }
-    const newpartnerEmail = partnerEmail.replace(/\D/g, "");
-    // Fetch partner data using JN_Id instead of ID
-    const partnerData = await Partner.findOne({ JN_Id: newpartnerEmail });
-
+    const partnerData = await Partner.findOne({ JN_Id: partnerEmail });
     if (!partnerData) {
       return res.status(404).json({ err: "Partner not found." });
     }
@@ -64,7 +61,7 @@ const postUserApplyForm = async (req, res) => {
     // Deduct balance before processing further
     const updatedBalance = AvailableBalance - amount;
    const ducductdata =  await Partner.findOneAndUpdate(
-      { JN_Id: newpartnerEmail },
+      { JN_Id: partnerEmail },
       { balance: updatedBalance },
       { new: true }
     );
