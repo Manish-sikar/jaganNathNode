@@ -61,6 +61,10 @@ const UserApplyFormSchema = new mongoose.Schema(
       type: String, // S3 URL
       default: null,
     },
+     status: {
+      type: String,
+      required: true,
+    },
     createdAt: {
       type: Date,
       default: Date.now,
