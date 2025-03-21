@@ -197,14 +197,6 @@ const PartnerRegister = async (req, res) => {
      JN_Id: `POS${JN_Id}`,
       password: hashedPassword,
     });
-
-
-    const result = await Partner.updateMany(
-      { balance: { $exists: false } }, // Find users without a balance
-      { $set: { balance: "0" } } // Set balance to "0"
-    );
-    console.log(result)
-
     // Save the user to the database
     await newUser.save();
 
