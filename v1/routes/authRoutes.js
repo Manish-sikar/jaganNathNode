@@ -25,6 +25,7 @@ const { PartnerLogin, PartnerRegister, GetPartnerRegister, updatePartnerRegister
 const { postLoanData, getLoanData, updateLoanData, deleteLoanData, changeStatusLoanData } = require("../controller/loanDataController");
 const { postUserApplyForm, getUserApplyForm, deleteUserApplyForm, updateUserApplyForm } = require("../controller/applyFormController");
 const { forgotPasswordSendOtp, UserRegisterverifyOtp, forgotChangePasswordUser } = require("../controller/forgotPasswordController");
+const { getReportStatus } = require("../controller/reportController");
 
 
 
@@ -203,6 +204,9 @@ router.put("/loan_details/chanege_status", changeStatusLoanData);
 router.post("/changePassSendOtp" , forgotPasswordSendOtp );
 router.post("/verifyOtp" , UserRegisterverifyOtp );
 router.post("/resetPassword", forgotChangePasswordUser );
+
+// get report of form
+router.post("/reportStatus", getReportStatus );
 
 
 module.exports = router;
