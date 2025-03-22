@@ -5,7 +5,6 @@ const { v4: uuidv4 } = require("uuid");
 const LoanModel = require("../models/LoanDataModel");
 const Partner = require("../models/userRegModel");
 const TransactionHistory = require("../models/TransactionHistory");
-const { emitEvent } = require("../socket/socketServer");
 
 // AWS S3 Configuration
 const s3 = new AWS.S3({
@@ -140,7 +139,6 @@ const postUserApplyForm = async (req, res) => {
     });
 
     await transaction.save(); // Save to DB    
-    emitEvent("fetchWalletBalance", { message: "Wallet balance updated." });
     return res.status(201).json({
       message: "User application form data saved successfully!",
       user_balance :updatedBalance 
