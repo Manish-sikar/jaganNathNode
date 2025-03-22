@@ -3,7 +3,7 @@ const UserApplyFormModel = require("../models/UserApplyFormModel");
 const getReportStatus = async(req,res)=>{
     try {
         const {partnerEmail}=req.body
-        
+        console.log(partnerEmail)
             // Fetch partner data using JN_Id instead of ID
             const partnerData = await UserApplyFormModel.find({ partnerEmail:partnerEmail });
         // Retrieve all contact form details
