@@ -49,7 +49,7 @@ app.get('/api/admin/uploads/:filename', (req, res) => {
 
 
 // Start the server
-app.listen(PORT,0.0.0.0, async () => {
+app.listen(PORT, async () => {
   try {
     await connectToDatabase();
   } catch (error) {
