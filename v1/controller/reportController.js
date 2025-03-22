@@ -3,9 +3,9 @@ const UserApplyFormModel = require("../models/UserApplyFormModel");
 const getReportStatus = async(req,res)=>{
     try {
         const {partnerEmail}=req.body
-        const newpartnerEmail = `${String(partnerEmail)}`; 
+        
             // Fetch partner data using JN_Id instead of ID
-            const partnerData = await UserApplyFormModel.find({ partnerEmail:newpartnerEmail });
+            const partnerData = await UserApplyFormModel.find({ partnerEmail:partnerEmail });
         // Retrieve all contact form details
     
         // Check if there are no records in the database
