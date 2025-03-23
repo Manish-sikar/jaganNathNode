@@ -49,6 +49,10 @@ const UserApplyFormSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    message: {
+      type: String, // S3 URL
+      default: null,
+    },
     document1: {
       type: String, // S3 URL
       default: null,
@@ -61,6 +65,7 @@ const UserApplyFormSchema = new mongoose.Schema(
       type: String, // S3 URL
       default: null,
     },
+    documents: mongoose.Schema.Types.Mixed,// Support dynamic fields
     status: {
       type: String,
       required: true,
