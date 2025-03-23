@@ -16,7 +16,6 @@ const UserApplyFormSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      lowercase: true,
     },
     phone: {
       type: String,
