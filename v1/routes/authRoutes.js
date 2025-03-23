@@ -26,6 +26,7 @@ const { postLoanData, getLoanData, updateLoanData, deleteLoanData, changeStatusL
 const { postUserApplyForm, getUserApplyForm, deleteUserApplyForm, updateUserApplyForm } = require("../controller/applyFormController");
 const { forgotPasswordSendOtp, UserRegisterverifyOtp, forgotChangePasswordUser } = require("../controller/forgotPasswordController");
 const { getReportStatus } = require("../controller/reportController");
+const { postUserApplyFormStatus, postUserApplyFormChangeStatus } = require("../controller/reportStatusController");
 
 
 
@@ -207,6 +208,16 @@ router.post("/resetPassword", forgotChangePasswordUser );
 
 // get report of form
 router.post("/reportStatus", getReportStatus );
+
+//report status 
+router.post("/user_apply_form-change-status" , postUserApplyFormChangeStatus)
+
+router.post("/user_apply_form-status", upload.fields([
+  { name: "document4", maxCount: 1 },
+  { name: "document5", maxCount: 1 },
+  { name: "document6", maxCount: 1 },
+  { name: "document7", maxCount: 1 }
+]), postUserApplyFormStatus)
 
 
 module.exports = router;
