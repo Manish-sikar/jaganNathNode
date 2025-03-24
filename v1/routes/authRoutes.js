@@ -26,7 +26,7 @@ const { postLoanData, getLoanData, updateLoanData, deleteLoanData, changeStatusL
 const { postUserApplyForm, getUserApplyForm, deleteUserApplyForm, updateUserApplyForm } = require("../controller/applyFormController");
 const { forgotPasswordSendOtp, UserRegisterverifyOtp, forgotChangePasswordUser } = require("../controller/forgotPasswordController");
 const { getReportStatus } = require("../controller/reportController");
-const { postUserApplyFormStatus, postUserApplyFormChangeStatus } = require("../controller/reportStatusController");
+const { postUserApplyFormStatus, postUserApplyFormChangeStatus , getTransitionHistory} = require("../controller/reportStatusController");
 
 
 
@@ -218,6 +218,6 @@ router.post("/user_apply_form-status", upload.fields([
   { name: "document6", maxCount: 1 },
   { name: "document7", maxCount: 1 }
 ]), postUserApplyFormStatus)
-
+router.get("/get-transition-data/:id" ,getTransitionHistory )
 
 module.exports = router;
