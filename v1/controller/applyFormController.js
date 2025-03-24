@@ -130,12 +130,12 @@ const postUserApplyForm = async (req, res) => {
     }
 
 
-     // Save transaction history
+  // Save transaction history
      const transaction = new TransactionHistory({
       JN_Id: partnerEmail,
       amountDeducted: amount,
       availableBalanceAfter: updatedBalance,
-      purpose: `Request for ${category}`,
+      purpose: `Applied for ${subCategory} under ${category} category.`,
     });
 
     await transaction.save(); // Save to DB    
