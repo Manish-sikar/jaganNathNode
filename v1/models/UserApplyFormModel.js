@@ -16,6 +16,7 @@ const UserApplyFormSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      lowercase: true,
     },
     phone: {
       type: String,
@@ -64,7 +65,22 @@ const UserApplyFormSchema = new mongoose.Schema(
       type: String, // S3 URL
       default: null,
     },
-    documents: mongoose.Schema.Types.Mixed,// Support dynamic fields
+    document4: {
+      type: String, // S3 URL
+      default: null,
+    },
+    document5: {
+      type: String, // S3 URL
+      default: null,
+    },
+    document6: {
+      type: String, // S3 URL
+      default: null,
+    },
+    document7: {
+      type: String, // S3 URL
+      default: null,
+    },
     status: {
       type: String,
       required: true,
