@@ -1,6 +1,7 @@
 const UserApplyFormModel = require("../models/UserApplyFormModel");
 const AWS = require("aws-sdk");
 const { v4: uuidv4 } = require("uuid");
+const TransactionHistory = require("../models/TransactionHistory");
 
 // AWS S3 Configuration
 const s3 = new AWS.S3({
@@ -100,7 +101,38 @@ const postUserApplyFormChangeStatus = async (req, res) => {
   }
 };
 
+
+
+// Simple status update
+const getTransitionHistory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log("Received ID:", id);
+
+    if (!id) {
+      return res.status(400).json({ error: "Partner ID is required!" });
+    }
+
+    // Use find() to fetch all records with matching JN_Id
+    const transactionData = await TransactionHistory.find({ JN_Id: String(id) });
+
+    if (!transactionData || transactionData.length === 0) {
+      return res.status(404).json({ error: "No transaction data found for this Partner ID!" });
+    }
+
+    return res.status(200).json({ message: "Data retrieved successfully!", data: transactionData });
+
+  } catch (error) {
+    console.error("Error fetching transaction data:", error);
+    return res.status(500).json({ error: "An error occurred while fetching the data." });
+  }
+};
+
+
+
+
 module.exports = {
   postUserApplyFormStatus,
-  postUserApplyFormChangeStatus
+  postUserApplyFormChangeStatus ,
+  getTransitionHistory
 };
