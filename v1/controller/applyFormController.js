@@ -14,6 +14,7 @@ const s3 = new AWS.S3({
   region: process.env.AWS_REGION,
 });
 
+
 const postUserApplyForm = async (req, res) => {
   try {
     const {
@@ -103,6 +104,7 @@ const postUserApplyForm = async (req, res) => {
       const generateToken = () => {
         return crypto.randomInt(100000, 999999).toString(); // Generates a 6-digit random number
       };
+      const Token_NO = generateToken()
     // Create a new instance of UserApplyFormModel
     const userForm = new UserApplyFormModel({
       partnerEmail,
@@ -115,7 +117,7 @@ const postUserApplyForm = async (req, res) => {
       fullAddress,
       category,
       subCategory,
-      token_No: generateToken(), // Call the function to generate a token
+      token_No: Token_NO, // Call the function to generate a token
       document1: document1Url,
       document2: document2Url,
       document3: document3Url,
@@ -153,7 +155,8 @@ const postUserApplyForm = async (req, res) => {
     await transaction.save(); // Save to DB    
     return res.status(201).json({
       message: "User application form data saved successfully!",
-      user_balance :updatedBalance 
+      user_balance :updatedBalance ,
+      form_user_id :Token_NO
     });
   } catch (error) {
     console.error("Error in postUserApplyForm:", error);
