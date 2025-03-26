@@ -2,9 +2,10 @@ const UserApplyFormModel = require("../models/UserApplyFormModel");
 
 const AWS = require("aws-sdk");
 const { v4: uuidv4 } = require("uuid");
-const LoanModel = require("../models/LoanDataModel");
 const Partner = require("../models/userRegModel");
 const TransactionHistory = require("../models/TransactionHistory");
+const crypto = require("crypto");
+
 
 // AWS S3 Configuration
 const s3 = new AWS.S3({
@@ -92,7 +93,16 @@ const postUserApplyForm = async (req, res) => {
     const document3Url = req.files["document3"]
       ? await uploadFileToS3(req.files["document3"][0], "documents")
       : null;
- 
+
+      await UserApplyFormModel.updateMany(
+        { partnerEmail }, // Match based on partnerEmail
+        { $set: { status: 1 } }
+      );
+
+      //create a token every form for uniqe no
+      const generateToken = () => {
+        return crypto.randomInt(100000, 999999).toString(); // Generates a 6-digit random number
+      };
     // Create a new instance of UserApplyFormModel
     const userForm = new UserApplyFormModel({
       partnerEmail,
@@ -105,15 +115,17 @@ const postUserApplyForm = async (req, res) => {
       fullAddress,
       category,
       subCategory,
+      token_No: generateToken(), // Call the function to generate a token
       document1: document1Url,
       document2: document2Url,
       document3: document3Url,
       status:1
     });
-  await UserApplyFormModel.updateMany(
+    await UserApplyFormModel.updateMany(
       { partnerEmail }, // Match based on partnerEmail
       { $set: { status: 1 } }
     );
+
     // Save the data to the database
     await userForm.save();
 
@@ -130,7 +142,7 @@ const postUserApplyForm = async (req, res) => {
     }
 
 
-  // Save transaction history
+     // Save transaction history
      const transaction = new TransactionHistory({
       JN_Id: partnerEmail,
       amountDeducted: amount,
@@ -468,6 +480,7 @@ const updateUserApplyForm = async (req, res) => {
       .json({ err: "An error occurred while updating the form." });
   }
 };
+
 
 module.exports = {
   postUserApplyForm,
