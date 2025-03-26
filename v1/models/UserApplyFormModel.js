@@ -53,6 +53,11 @@ const UserApplyFormSchema = new mongoose.Schema(
       type: String, // S3 URL
       default: null,
     },
+    token_No: {
+      type: String,
+      required: true,
+      unique: true, // Ensure each token is unique
+    },
     document1: {
       type: String, // S3 URL
       default: null,
