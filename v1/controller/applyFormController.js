@@ -14,7 +14,6 @@ const s3 = new AWS.S3({
   region: process.env.AWS_REGION,
 });
 
-
 const postUserApplyForm = async (req, res) => {
   try {
     const {
@@ -30,6 +29,7 @@ const postUserApplyForm = async (req, res) => {
       subCategory,
       amount,
     } = req.body;
+
     // Validate required fields
     if (
       !partnerEmail ||
@@ -46,12 +46,13 @@ const postUserApplyForm = async (req, res) => {
     ) {
       return res.status(400).json({ err: "All fields are required." });
     }
-    const partnerData = await Partner.findOne({ JN_Id: partnerEmail });
+const partnerData = await Partner.findOne({ JN_Id: partnerEmail });
     if (!partnerData) {
       return res.status(404).json({ err: "Partner not found." });
     }
 
     let AvailableBalance = Number(partnerData?.balance) || 0;
+
     // Validate available balance
     if (AvailableBalance < amount) {
       return res
@@ -59,19 +60,19 @@ const postUserApplyForm = async (req, res) => {
         .json({ err: "Insufficient balance. Try again later." });
     }
 
-    // Deduct balance before processing further
+    // Deduct balance once, before processing the form
     const updatedBalance = AvailableBalance - amount;
-   const ducductdata =  await Partner.findOneAndUpdate(
+    await Partner.findOneAndUpdate(
       { JN_Id: partnerEmail },
       { balance: updatedBalance },
       { new: true }
     );
+
+    // File upload function for S3
     const uploadFileToS3 = async (file, folder) => {
       if (!file) return null; // If no file is provided, return null
 
-      const uniqueFilename = `${folder}/${Date.now()}_${uuidv4()}_${
-        file.originalname
-      }`;
+      const uniqueFilename = ${folder}/${Date.now()}_${uuidv4()}_${file.originalname};
       const uploadParams = {
         Bucket: process.env.AWS_BUCKET_NAME,
         Key: uniqueFilename,
@@ -79,8 +80,7 @@ const postUserApplyForm = async (req, res) => {
         ContentType: file.mimetype,
         ACL: "public-read",
       };
-
-      const uploadResult = await s3.upload(uploadParams).promise();
+ const uploadResult = await s3.upload(uploadParams).promise();
       return uploadResult.Location; // Return the public URL of the uploaded file
     };
 
@@ -95,17 +95,17 @@ const postUserApplyForm = async (req, res) => {
       ? await uploadFileToS3(req.files["document3"][0], "documents")
       : null;
 
-      await UserApplyFormModel.updateMany(
-        { partnerEmail }, // Match based on partnerEmail
-        { $set: { status: 1 } }
-      );
+    await UserApplyFormModel.updateMany(
+      { partnerEmail }, // Match based on partnerEmail
+      { $set: { status: 1 } }
+    );
 
-      //create a token every form for uniqe no
-      const generateToken = () => {
-        return crypto.randomInt(100000, 999999).toString(); // Generates a 6-digit random number
-      };
-      const Token_NO = generateToken()
-    // Create a new instance of UserApplyFormModel
+    // Generate a unique token for the form
+    const generateToken = () => {
+      return crypto.randomInt(100000, 999999).toString(); // Generates a 6-digit random number
+    };
+    const Token_NO = generateToken();
+// Create a new instance of UserApplyFormModel
     const userForm = new UserApplyFormModel({
       partnerEmail,
       fullName,
@@ -121,51 +121,40 @@ const postUserApplyForm = async (req, res) => {
       document1: document1Url,
       document2: document2Url,
       document3: document3Url,
-      status:1
+      status: 1,
     });
-    await UserApplyFormModel.updateMany(
-      { partnerEmail }, // Match based on partnerEmail
-      { $set: { status: 1 } }
-    );
 
     // Save the data to the database
     await userForm.save();
 
-    if (AvailableBalance < amount) {
-      const deductBalance = AvailableBalance - amount;
-
-      await Partner.findByIdAndUpdate(
-        { JN_Id: partnerEmail },
-        {
-          balance: deductBalance,
-        },
-        { new: true }
-      );
-    }
-
-
-     // Save transaction history
-     const transaction = new TransactionHistory({
+    // Save transaction history
+    const transaction = new TransactionHistory({
       JN_Id: partnerEmail,
       amountDeducted: amount,
       availableBalanceAfter: updatedBalance,
-      purpose: `Applied for ${subCategory} under ${category} category.`,
+      purpose: Applied for ${subCategory} under ${category} category.,
     });
 
-    await transaction.save(); // Save to DB    
+    await transaction.save(); // Save to DB
     return res.status(201).json({
       message: "User application form data saved successfully!",
-      user_balance :updatedBalance ,
-      form_user_id :Token_NO
+      user_balance: updatedBalance,
+      form_user_id: Token_NO,
     });
   } catch (error) {
     console.error("Error in postUserApplyForm:", error);
     return res
       .status(500)
-      .json({ err: "An error occurred while processing the request." });
-  }
+      .json({ err: "An error occurred while processing the request." });
+  }
 };
 
+
+
+
+
+
+  
 const getUserApplyForm = async (req, res) => {
   try {
     // Retrieve all contact form details
