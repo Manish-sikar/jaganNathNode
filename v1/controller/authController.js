@@ -1,6 +1,9 @@
 const bcrypt = require("bcrypt");
 const LoginModel = require("../models/authModel");
 const { comparePassword, JwtCreate } = require("../services/authServices");
+const Partner = require("../models/userRegModel");
+const TransactionHistory = require("../models/TransactionHistory");
+
 const AdminLogin = async (req, res) => {
   try {
     // {
@@ -65,4 +68,59 @@ const AdminLoginpost = async (req, res) => {
   }
 };
 
-module.exports = { AdminLogin , AdminLoginpost};
+
+
+
+
+
+const AddAmountByAdmin = async (req, res) => {
+  try {
+    const { amount, partnerEmail, remark } = req.body;
+
+    // Validate amount
+    if (!amount || !Number.isFinite(Number(amount)) || amount <= 0) {
+      return res.status(400).json({ error: "Invalid amount value." });
+    }
+
+    // Check partner existence
+    const partnerData = await Partner.findOne({ JN_Id: String(partnerEmail) });
+    if (!partnerData) {
+      return res.status(404).json({ error: "Partner not found." });
+    }
+
+    // Calculate and update balance
+    const availableBalance = Number(partnerData.balance) || 0;
+    const updatedBalance = availableBalance + Number(amount);
+
+    await Partner.findOneAndUpdate(
+      { JN_Id: String(partnerEmail) },
+      { balance: updatedBalance },
+      { new: true }
+    );
+
+    // Save transaction history
+    const transaction = new TransactionHistory({
+      JN_Id: String(partnerEmail),
+      amountDeducted: Number(amount),
+      availableBalanceAfter: updatedBalance,
+      purpose: String(remark),
+      amountType:"credit"
+    });
+    // amountType: {
+    //   type: String,
+    //   enum: ["credit", "debit"],
+    //   required: true,
+    // }
+    
+
+    await transaction.save();
+
+    return res.status(200).json({ message: "Amount added successfully!", updatedBalance });
+  } catch (error) {
+    console.error("Error adding amount:", error);
+    return res.status(500).json({ error: "An error occurred while adding the amount." });
+  }
+};
+
+
+module.exports = { AdminLogin , AdminLoginpost , AddAmountByAdmin};
