@@ -128,11 +128,12 @@ const partnerData = await Partner.findOne({ JN_Id: partnerEmail });
     await userForm.save();
 
     // Save transaction history
-    const transaction = new TransactionHistory({
+     const transaction = new TransactionHistory({
       JN_Id: partnerEmail,
       amountDeducted: amount,
       availableBalanceAfter: updatedBalance,
       purpose: `Applied for ${subCategory} under ${category} category.`,
+      amountType: "debit"
     });
 
     await transaction.save(); // Save to DB
