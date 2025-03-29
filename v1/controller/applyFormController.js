@@ -59,15 +59,6 @@ const partnerData = await Partner.findOne({ JN_Id: partnerEmail });
         .status(400)
         .json({ err: "Insufficient balance. Try again later." });
     }
-
-    // Deduct balance once, before processing the form
-    const updatedBalance = AvailableBalance - amount;
-    await Partner.findOneAndUpdate(
-      { JN_Id: partnerEmail },
-      { balance: updatedBalance },
-      { new: true }
-    );
-
     // File upload function for S3
     const uploadFileToS3 = async (file, folder) => {
       if (!file) return null; // If no file is provided, return null
@@ -123,6 +114,14 @@ const partnerData = await Partner.findOne({ JN_Id: partnerEmail });
       document3: document3Url,
       status: 1,
     });
+
+        // Deduct balance once, before Save the data to the database
+    const updatedBalance = AvailableBalance - amount;
+    await Partner.findOneAndUpdate(
+      { JN_Id: partnerEmail },
+      { balance: updatedBalance },
+      { new: true }
+    );
 
     // Save the data to the database
     await userForm.save();
