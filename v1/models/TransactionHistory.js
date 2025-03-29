@@ -17,6 +17,11 @@ const transactionHistorySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  amountType: {
+    type: String,
+    enum: ["credit", "debit"],
+    required: true,
+  },  
   timestamp: {
     type: Date,
     default: Date.now,
