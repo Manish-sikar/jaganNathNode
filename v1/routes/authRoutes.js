@@ -1,4 +1,4 @@
-const { AdminLogin, AdminLoginpost } = require("../controller/authController");
+const { AdminLogin, AdminLoginpost , AddAmountByAdmin } = require("../controller/authController");
 const {
   updateDataSite,
   getDataSite,
@@ -219,5 +219,9 @@ router.post("/user_apply_form-status", upload.fields([
   { name: "document7", maxCount: 1 }
 ]), postUserApplyFormStatus)
 router.get("/get-transition-data/:id" ,getTransitionHistory )
+
+
+router.post("/addAmountByAdmin" , AddAmountByAdmin )
+
 
 module.exports = router;
