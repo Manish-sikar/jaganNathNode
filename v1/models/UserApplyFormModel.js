@@ -79,11 +79,11 @@ const UserApplyFormSchema = new mongoose.Schema(
       default: null,
     },
     document6: {
-      type: String, // S3 URL
+      type: String,
       default: null,
     },
     document7: {
-      type: String, // S3 URL
+      type: String, 
       default: null,
     },
     status: {
