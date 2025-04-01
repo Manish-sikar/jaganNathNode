@@ -98,11 +98,11 @@ const partnerData = await Partner.findOne({ JN_Id: partnerEmail });
     };
     const Token_NO = generateToken();
     
-UserApplyFormModel.collection.dropIndex("email_1").then(() => {
-  console.log("Unique index on email dropped successfully!");
-}).catch(err => {
-  console.log("Error dropping index:", err);
-});
+// UserApplyFormModel.collection.dropIndex("email_1").then(() => {
+//   console.log("Unique index on email dropped successfully!");
+// }).catch(err => {
+//   console.log("Error dropping index:", err);
+// });
 
 
     
