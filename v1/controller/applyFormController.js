@@ -124,6 +124,9 @@ const partnerData = await Partner.findOne({ JN_Id: partnerEmail });
       status: 1,
     });
 
+    // Save the data to the database
+    await userForm.save();
+
         // Deduct balance once, before Save the data to the database
     const updatedBalance = AvailableBalance - amount;
     await Partner.findOneAndUpdate(
@@ -132,8 +135,7 @@ const partnerData = await Partner.findOne({ JN_Id: partnerEmail });
       { new: true }
     );
 
-    // Save the data to the database
-    await userForm.save();
+    
 
     // Save transaction history
      const transaction = new TransactionHistory({
