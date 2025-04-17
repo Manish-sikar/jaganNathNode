@@ -1,4 +1,5 @@
-const { AdminLogin, AdminLoginpost , AddAmountByAdmin } = require("../controller/authController");
+const { AdminLogin, AdminLoginpost, AddAmountByAdmin, SumbitPaymentDetails, getPaymentDetails, updatePaymentStatus } = require("../controller/authController"); 
+
 const {
   updateDataSite,
   getDataSite,
@@ -223,5 +224,10 @@ router.get("/get-transition-data/:id" ,getTransitionHistory )
 
 router.post("/addAmountByAdmin" , AddAmountByAdmin )
 
+
+
+router.post("/SumbitPaymentDetails" , SumbitPaymentDetails )
+router.get("/getPaymentDetails" , getPaymentDetails )
+router.put("/updatePaymentStatus" , updatePaymentStatus )
 
 module.exports = router;
