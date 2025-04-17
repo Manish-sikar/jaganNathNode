@@ -3,7 +3,6 @@ const LoginModel = require("../models/authModel");
 const { comparePassword, JwtCreate } = require("../services/authServices");
 const Partner = require("../models/userRegModel");
 const TransactionHistory = require("../models/TransactionHistory");
-
 const AdminLogin = async (req, res) => {
   try {
     // {
@@ -71,8 +70,6 @@ const AdminLoginpost = async (req, res) => {
 
 
 
-
-
 const AddAmountByAdmin = async (req, res) => {
   try {
     const { amount, partnerEmail, remark } = req.body;
@@ -101,7 +98,7 @@ const AddAmountByAdmin = async (req, res) => {
     // Save transaction history
     const transaction = new TransactionHistory({
       JN_Id: String(partnerEmail),
-      amountDeducted: Number(amount),
+      requestingAmount: Number(amount),
       availableBalanceAfter: updatedBalance,
       purpose: String(remark),
       amountType:"credit"
@@ -122,5 +119,103 @@ const AddAmountByAdmin = async (req, res) => {
   }
 };
 
+const SumbitPaymentDetails = async (req, res) => {
+  try {
+    const { JN_ID, amount, utr } = req.body;
 
-module.exports = { AdminLogin , AdminLoginpost , AddAmountByAdmin};
+    const transaction = new TransactionHistory({
+      JN_Id: JN_ID,
+      requestingAmount: amount,
+      purpose: `Requesting for Add Amount Balance.`,
+      amountType: "credit",
+      Utr_No: utr,
+      status: "pending",
+    });
+
+    await transaction.save(); // 🛠 Save the transaction to the database
+
+    res.status(200).json({ message: "Payment details submitted successfully." });
+  } catch (error) {
+    console.error("Error submitting payment details:", error);
+    res.status(500).json({ message: "Something went wrong while saving the transaction." });
+  }
+};
+
+const getPaymentDetails = async (req, res) => {
+  try {
+    // Find transactions where Utr_No is not null or undefined
+    const transactions = await TransactionHistory.find({
+      Utr_No: { $exists: true, $ne: null }
+    }).sort({ createdAt: -1 });
+
+    res.status(200).json({ requests: transactions });
+  } catch (error) {
+    console.error("Error fetching payment details:", error);
+    res.status(500).json({ message: "Something went wrong while fetching payment details." });
+  }
+};
+
+// controllers/paymentController.js
+
+const updatePaymentStatus = async (req, res) => {
+  try {
+    const { id } = req.body;
+    console.log("Received request body:", req.body);
+
+    // 1. Find the existing transaction
+    const transaction = await TransactionHistory.findById(id);
+    if (!transaction) {
+      return res.status(404).json({ message: "Transaction not found." });
+    }
+
+
+    // 2. Only allow status change from "pending"
+    if (transaction.status !== "pending") {
+      return res
+        .status(400)
+        .json({ message: "Only pending transactions can be updated." });
+    }
+ 
+    // 3. Try to find the partner using JN_Id first
+    let partner = await Partner.findOne({ JN_Id: transaction.JN_Id });
+
+    if (!partner) {
+      return res.status(404).json({ message: "Partner not found." });
+    }
+
+
+    // 5. Credit the amount to partner's wallet
+    const currentBalance = Number(partner.balance || 0);
+    const creditAmount = Number(transaction.requestingAmount || 0);
+    const updatedBalance = currentBalance + creditAmount;
+
+    partner.balance = updatedBalance;
+    await partner.save();
+
+    // 6. Update the transaction record
+    transaction.status = "success";
+    transaction.purpose = `${creditAmount} Amount added to your Wallet successfully`;
+    transaction.availableBalanceAfter = updatedBalance;
+    await transaction.save();
+
+    // 7. Respond with success
+    return res.status(200).json({
+      message: "Transaction approved.",
+      status: transaction.status,
+      availableBalance: updatedBalance,
+    });
+  } catch (error) {
+    console.error("Error updating payment status:", error);
+    return res.status(500).json({
+      message: "Failed to update payment status.",
+      error: error.message,
+    });
+  }
+};
+
+
+
+
+
+module.exports = { AdminLogin , AdminLoginpost , AddAmountByAdmin , 
+  SumbitPaymentDetails , getPaymentDetails , updatePaymentStatus};
