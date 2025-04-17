@@ -7,11 +7,12 @@ const transactionHistorySchema = new mongoose.Schema({
   },
   amountDeducted: {
     type: Number,
-    required: true,
   },
   availableBalanceAfter: {
     type: Number,
-    required: true,
+  },
+  requestingAmount: {
+    type: Number,
   },
   purpose: {
     type: String,
@@ -21,7 +22,13 @@ const transactionHistorySchema = new mongoose.Schema({
     type: String,
     enum: ["credit", "debit"],
     required: true,
-  },  
+  },  status: {
+    type: String,
+    enum: ["pending", "success"],
+  },
+   Utr_No: {
+    type: Number,
+  },
   timestamp: {
     type: Date,
     default: Date.now,
