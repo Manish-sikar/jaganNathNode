@@ -4,68 +4,153 @@ const fs = require("fs");
 const TeamsModel = require("../models/teamModel");
 
 
+const AWS = require("aws-sdk");
+const { v4: uuidv4 } = require("uuid");
+
+// AWS S3 Config
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+});
+
+// Upload image to S3
+const uploadToS3 = async (buffer, fileName, mimeType) => {
+  const params = {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: `teams/${fileName}`,
+    Body: buffer,
+    ContentType: mimeType,
+    ACL: "public-read",
+  };
+
+  const { Location } = await s3.upload(params).promise();
+  return Location;
+};
+
+
+
+
+
+// // Post Team Data
+// const postTeamData = async (req, res) => {
+//   try {
+//     const { team_member, degination, social_icons } = req.body;
+//     const status = 1;
+
+//     // Validation
+//     if (!team_member || !degination || !social_icons) {
+//       return res.status(400).json({
+//         error: "All fields are required: team member, designation, and social icons.",
+//       });
+//     }
+
+//     // Parse and validate social icons
+//     let parsedSocialIcons;
+//     try {
+//       parsedSocialIcons = JSON.parse(social_icons);
+//     } catch (err) {
+//       return res.status(400).json({ error: "Invalid JSON format for social_icons." });
+//     }
+
+//     if (!Array.isArray(parsedSocialIcons) || parsedSocialIcons.length === 0) {
+//       return res.status(400).json({ error: "At least one social icon is required." });
+//     }
+
+//     // Check for image file
+//     if (!req.file) {
+//       return res.status(400).json({ error: "Team image is required." });
+//     }
+
+//     // Upload original image to S3
+//     const fileName = `${uuidv4()}_${req.file.originalname}`;
+//     const imageUrl = await uploadToS3(req.file.buffer, fileName, req.file.mimetype);
+
+//     // Save to database
+//     const teamData = new TeamsModel({
+//       teamimg: imageUrl,
+//       team_member,
+//       degination,
+//       social_icons: parsedSocialIcons,
+//       status,
+//     });
+
+//     await teamData.save();
+
+//     return res.status(201).json({
+//       message: "Team data saved successfully!",
+//       data: teamData,
+//     });
+//   } catch (error) {
+//     console.error("Error in postTeamData:", error);
+//     return res.status(500).json({
+//       error: "An error occurred while saving team data.",
+//     });
+//   }
+// };
+
+ 
+ 
 
 const postTeamData = async (req, res) => {
   try {
     const { team_member, degination, social_icons } = req.body;
     const status = 1;
 
-    // Check if the card logo file exists
-    if (!req.file) {
-      return res.status(400).json({ err: "Team Image is required." });
-    }
-
-    const imagePath = req.file.path; // Original image path
-
-    // Define a new path for the resized image
-    const resizedImagePath = path.join(
-      "uploads",
-      `resized_${req.file.filename}`
-    );
-
-    // Resize the image to 500x500 using Sharp and save to a new file
-    await sharp(imagePath)
-      .resize(500, 500) // Set width and height
-      .toFile(resizedImagePath); // Save resized image to a new file
-
-    // Validate required fields
-    if (!team_member || !degination || !social_icons || !status) {
+    // Validation
+    if (!team_member || !degination || !social_icons) {
       return res.status(400).json({
-        err: "All fields are required, including team member name, designation, social icons, and status.",
+        error: "All fields are required: team member, designation, and social icons.",
       });
     }
 
-    // Validate social_icons
-    const parsedSocialIcons = JSON.parse(social_icons); // Parse the social_icons if it's a JSON string
-    if (!Array.isArray(parsedSocialIcons) || parsedSocialIcons.length === 0) {
-      return res
-        .status(400)
-        .json({ err: "At least one social icon is required." });
+    // Parse social_icons if it's a string
+    let parsedSocialIcons;
+    try {
+      parsedSocialIcons = typeof social_icons === "string" 
+        ? JSON.parse(social_icons) 
+        : social_icons;
+    } catch (err) {
+      return res.status(400).json({ error: "Invalid JSON format for social_icons." });
     }
 
-    // Create a new instance of TeamsModel
-    let teamData = new TeamsModel({
-      teamimg: resizedImagePath, // Use the resized image path for the logo
+    if (!Array.isArray(parsedSocialIcons) || parsedSocialIcons.length === 0) {
+      return res.status(400).json({ error: "At least one social icon is required." });
+    }
+
+    // Optional image handling
+    let imageUrl = "";
+    if (req.file) {
+      const fileName = `${uuidv4()}_${req.file.originalname}`;
+      imageUrl = await uploadToS3(req.file.buffer, fileName, req.file.mimetype);
+    }
+
+    // Save to DB
+    const teamData = new TeamsModel({
+      teamimg: imageUrl, // Empty string if no image
       team_member,
       degination,
-      social_icons: parsedSocialIcons, // Save the parsed social icons array
+      social_icons: parsedSocialIcons,
       status,
     });
 
-    // Save the team data to the database
     await teamData.save();
 
-    // Send a success response
     return res.status(201).json({
-      message: "Team details saved successfully in the database!",
+      message: "Team data saved successfully!",
+      data: teamData,
     });
   } catch (error) {
-    console.error("Error in postTeamData: ", error);
-    return res
-      .status(500)
-      .json({ err: "An error occurred while saving team data." });
+    console.error("Error in postTeamData:", error);
+    return res.status(500).json({
+      error: "An error occurred while saving team data.",
+    });
   }
 };
+
+
+
+ 
 
 
 
@@ -85,7 +170,9 @@ const getTeamData = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+ 
 
+// Update Team Data
 const updateTeamData = async (req, res) => {
   try {
     const { _id, team_member, degination, social_icons } = req.body;
@@ -101,44 +188,41 @@ const updateTeamData = async (req, res) => {
       return res.status(404).json({ err: "ID not found. Please provide a valid ID." });
     }
 
-    let resizedImagePath = teamData.teamimg;
-    if (req.file) {
-      const imagePath = req.file.path;
-      resizedImagePath = path.join("uploads", `resized_${req.file.filename}`);
-      await sharp(imagePath).resize(500, 500).toFile(resizedImagePath);
-    }
-
     if (!team_member || !degination || !social_icons) {
       return res.status(400).json({ err: "All fields are required." });
     }
 
-    // Parse social_icons if it's a string
-    const parsedSocialIcons = typeof social_icons === 'string' ? JSON.parse(social_icons) : social_icons;
+    // Upload new image if available
+    let imageUrl = teamData.teamimg;
+    if (req.file) {
+      const fileName = `${uuidv4()}_${req.file.originalname}`;
+      imageUrl = await uploadToS3(req.file.buffer, fileName, req.file.mimetype);
+    }
 
-    // Update existing icons or add new ones
+    // Parse social icons
+    const parsedSocialIcons = typeof social_icons === 'string'
+      ? JSON.parse(social_icons)
+      : social_icons;
+
+    // Merge social icons (update existing or add new)
     const updatedSocialIcons = parsedSocialIcons.map((newIcon) => {
       const existingIcon = teamData.social_icons.find((icon) => icon._id === newIcon._id);
-
-      if (existingIcon) {
-        // Only update the specified fields (icon_class, icon_url, icon_name)
-        return {
-          ...existingIcon,
-          icon_class: newIcon.icon_class || existingIcon.icon_class,
-          icon_url: newIcon.icon_url || existingIcon.icon_url,
-          icon_name: newIcon.icon_name || existingIcon.icon_name,
-        };
-      } else {
-        // Treat as a new icon if no match is found
-        return newIcon;
-      }
+      return existingIcon
+        ? {
+            ...existingIcon,
+            icon_class: newIcon.icon_class || existingIcon.icon_class,
+            icon_url: newIcon.icon_url || existingIcon.icon_url,
+            icon_name: newIcon.icon_name || existingIcon.icon_name,
+          }
+        : newIcon;
     });
 
-    // Update team data with new icons and other fields
+    // Prepare update object
     const updateData = {
       team_member,
       degination,
-      social_icons: updatedSocialIcons, // Replace old icons with the updated list
-      teamimg: resizedImagePath,
+      social_icons: updatedSocialIcons,
+      teamimg: imageUrl,
       updatedAt: Date.now(),
     };
 
@@ -153,48 +237,53 @@ const updateTeamData = async (req, res) => {
     return res.status(500).json({ err: "An error occurred, unable to update team details." });
   }
 };
+ 
+ 
 
+// Helper: Delete image from S3
+const deleteFromS3 = async (imageUrl) => {
+  const bucketName = process.env.AWS_BUCKET_NAME;
+  const key = imageUrl.split(".amazonaws.com/")[1]; // Extract S3 key
 
+  if (!key) return;
 
+  const params = {
+    Bucket: bucketName,
+    Key: key,
+  };
 
+  try {
+    await s3.deleteObject(params).promise();
+    console.log(`Image deleted from S3: ${key}`);
+  } catch (err) {
+    console.error("Error deleting from S3:", err);
+  }
+};
 
-
-
-
+// Controller: Delete team data and image
 const deleteTeamData = async (req, res) => {
   try {
-    console.log(req.params);
-    // Destructure _id from req.body
-    const  _id  = req.params.id;
-     // Validate required fields
+    const _id = req.params.id;
+
     if (!_id) {
       return res.status(400).json({ err: "Team Member ID is required!" });
     }
 
-    // Find the existing team data by ID and delete it
+    // Find and delete the team member
     const teamData = await TeamsModel.findByIdAndDelete(_id);
 
-    // Check if the team data exists
     if (!teamData) {
       return res.status(404).json({ error: "Team data not found!" });
     }
 
-    // Construct the full path to the image file
-    const fullImagePath = path.join(__dirname, "..", teamData.teamimg); // Adjust the path as needed
+    // Delete image from S3
+    if (teamData.teamimg) {
+      await deleteFromS3(teamData.teamimg);
+    }
 
-    // Delete the associated image file asynchronously
-    fs.unlink(fullImagePath, (err) => {
-      if (err) {
-        console.error(`Error deleting image file: ${fullImagePath}`, err);
-      } else {
-        console.log(`Successfully deleted image file: ${fullImagePath}`);
-      }
-    });
-
-    // Send a success response
     return res.status(200).json({
-      message: "Team data and associated image deleted successfully!",
-      data: teamData, // Return the deleted team data
+      message: "Team data and image deleted successfully!",
+      data: teamData,
     });
   } catch (error) {
     console.error("Error deleting team data:", error);
@@ -203,6 +292,8 @@ const deleteTeamData = async (req, res) => {
     });
   }
 };
+
+
 
 const changeStatusTeamData = async (req, res) => {
   try {
