@@ -145,11 +145,46 @@ const PartnerLogin = async (req, res) => {
 //   }
 // };
 
+
+const AWS = require("aws-sdk");
+const { v4: uuidv4 } = require("uuid");
+
+// AWS S3 Config
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+});
+
+// Upload image to S3
+const uploadToS3 = async (buffer, fileName, mimeType) => {
+  const params = {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: `partnerImage/${fileName}`,
+    Body: buffer,
+    ContentType: mimeType,
+    ACL: "public-read",
+  };
+
+  const { Location } = await s3.upload(params).promise();
+  return Location;
+};
+
 const PartnerRegister = async (req, res) => {
   try {
-    const { fullName, designation, email, mobile, institutionName, message, panNo, aadharNo, password } = req.body;
+    const {
+      fullName,
+      designation,
+      email,
+      mobile,
+      institutionName,
+      message,
+      panNo,
+      aadharNo,
+      password,
+      acDetails,
+    } = req.body;
 
-    // Validate input
     if (
       !fullName ||
       !designation ||
@@ -161,51 +196,63 @@ const PartnerRegister = async (req, res) => {
       !aadharNo ||
       !password
     ) {
-      return res.status(400).json({ error: "All fields are required" });
+      return res.status(400).json({ error: "All required fields must be filled" });
     }
 
-    // Check if the phone or email is already registered
-    const existingUser = await Partner.findOne({ $or: [{ mobile }, { email }, { panNo }, { aadharNo }] });
+    console.log(req.body)
+
+    const existingUser = await Partner.findOne({
+      $or: [{ mobile }, { email }, { panNo }, { aadharNo }],
+    });
+
     if (existingUser) {
       return res.status(400).json({
         error: `User with ${
           existingUser.mobile === mobile
-            ? 'mobile'
+            ? "mobile"
             : existingUser.email === email
-            ? 'email'
+            ? "email"
             : existingUser.panNo === panNo
-            ? 'pan number'
-            : 'aadhar number'
+            ? "PAN number"
+            : "Aadhar number"
         } already exists`,
       });
     }
 
-    // Hash the password
+    // Upload image to S3 if provided
+    let imageUrl = null;
+    if (req.file) {
+      const fileName = `${uuidv4()}-${req.file.originalname}`;
+      imageUrl = await uploadToS3(req.file.buffer, fileName, req.file.mimetype);
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
-    const JN_Id = await randomNumber()
-    // Create new user
+    const JN_Id = await randomNumber();
+
     const newUser = new Partner({
       fullName,
       designation,
       email,
       mobile,
-      balance:0,
+      balance: 0,
       institutionName,
       message,
       panNo,
       aadharNo,
-     JN_Id: `POS${JN_Id}`,
+      JN_Id: `POS${JN_Id}`,
       password: hashedPassword,
     });
-    // Save the user to the database
+
+    // Add optional fields
+    if (imageUrl) newUser.Avtar = imageUrl;
+    if (acDetails) newUser.acDetails = acDetails;
+
     await newUser.save();
 
-    // Return success response
     res.status(201).json({ message: "User created successfully" });
   } catch (error) {
-    // Handle MongoDB duplicate key error
     if (error.code === 11000) {
-      const field = Object.keys(error.keyPattern)[0]; // Get the field causing the error
+      const field = Object.keys(error.keyPattern)[0];
       return res.status(400).json({
         error: `User with this ${field} already exists`,
       });
@@ -215,6 +262,7 @@ const PartnerRegister = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 
 

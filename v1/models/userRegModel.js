@@ -53,6 +53,12 @@ const partnerSchema = new mongoose.Schema({
     required: true,
     unique:true
   },
+  Avtar: {
+    type: String,
+  },
+  acDetails: {
+    type: String,
+  },
 });
 
 // Create and export the Partner model

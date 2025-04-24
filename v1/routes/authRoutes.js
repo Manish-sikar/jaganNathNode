@@ -126,7 +126,7 @@ router.post("/loginPost", AdminLoginpost);
 
 // User Partner routes
 router.post("/User-login", PartnerLogin);
-router.post("/User-reg", PartnerRegister);
+router.post("/User-reg", upload.single("Avtar"), PartnerRegister);
 router.get("/User-reg", GetPartnerRegister);
 router.post("/getSpeacialParthner", GetSpecialpartnerData);
 router.put("/update-User-reg", updatePartnerRegister);
