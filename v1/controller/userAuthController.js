@@ -285,30 +285,58 @@ const GetPartnerRegister = async (req, res) => {
 
 
 
- 
 
 // Update Partner Details
 const updatePartnerRegister = async (req, res) => {
   try {
-    const updateData = req.body;
-    const id =req.body?._id
+    const { _id, ...updateData } = req.body;
 
-    if (!id) {
+    if (!_id) {
       return res.status(400).json({ error: "Partner ID is required" });
     }
 
-    const updatedPartner = await Partner.findByIdAndUpdate(id, updateData, { new: true });
-
-    if (!updatedPartner) {
+    const existingPartner = await Partner.findById(_id);
+    if (!existingPartner) {
       return res.status(404).json({ error: "Partner not found" });
     }
 
-    res.status(200).json({ message: "Partner updated successfully", data: updatedPartner });
+    // If new image is uploaded
+    if (req.file) {
+      // Delete old image from S3 if exists
+      if (existingPartner.Avtar) {
+        const oldImageKey = existingPartner.Avtar.split(`${process.env.AWS_BUCKET_NAME}/`)[1];
+        if (oldImageKey) {
+          try {
+            await s3
+              .deleteObject({
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: `partnerImage/${oldImageKey}`,
+              })
+              .promise();
+          } catch (err) {
+            console.error("Error deleting old image from S3:", err);
+          }
+        }
+      }
+
+      // Upload new image
+      const fileName = `${uuidv4()}-${req.file.originalname}`;
+      const imageUrl = await uploadToS3(req.file.buffer, fileName, req.file.mimetype);
+      updateData.Avtar = imageUrl;
+    }
+
+    const updatedPartner = await Partner.findByIdAndUpdate(_id, updateData, { new: true });
+
+    res.status(200).json({
+      message: "Partner updated successfully",
+      data: updatedPartner,
+    });
   } catch (error) {
     console.error("Error updating partner:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 // Delete Partner
 const deletePartnerRegister = async (req, res) => {
