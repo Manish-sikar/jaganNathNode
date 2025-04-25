@@ -129,7 +129,7 @@ router.post("/User-login", PartnerLogin);
 router.post("/User-reg", upload.single("Avtar"), PartnerRegister);
 router.get("/User-reg", GetPartnerRegister);
 router.post("/getSpeacialParthner", GetSpecialpartnerData);
-router.put("/update-User-reg", updatePartnerRegister);
+router.put("/update-User-reg",upload.single("Avtar"), updatePartnerRegister);
 router.post("/delete-User-reg/:id", deletePartnerRegister);
 router.post("/change-pass-User-reg", changePassPartnerRegister);
 
