@@ -97,7 +97,7 @@ const partnerData = await Partner.findOne({ JN_Id: partnerEmail });
       return crypto.randomInt(100000, 999999).toString(); // Generates a 6-digit random number
     };
     const Token_NO = generateToken();
-     UserApplyFormModel.collection.dropIndex("email_1").then(() => {
+     UserApplyFormModel.collection.dropIndex("panCard_1").then(() => {
  console.log("Unique index on email dropped successfully!");
 }).catch(err => {
  console.log("Error dropping index:", err);
