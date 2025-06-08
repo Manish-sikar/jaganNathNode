@@ -86,11 +86,7 @@ const partnerData = await Partner.findOne({ JN_Id: partnerEmail });
     const document3Url = req.files["document3"]
       ? await uploadFileToS3(req.files["document3"][0], "documents")
       : null;
-
-    await UserApplyFormModel.updateMany(
-      { partnerEmail }, // Match based on partnerEmail
-      { $set: { status: 1 } }
-    );
+ 
 
     // Generate a unique token for the form
     const generateToken = () => {
