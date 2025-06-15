@@ -151,7 +151,7 @@ const updateProjectsData = async (req, res) => {
       const uploadParams = {
         Bucket: process.env.AWS_BUCKET_NAME, // S3 Bucket Name
         Key: `projects/${uniqueFilename}`, // File path in S3
-        Body: resizedImageBuffer,
+        Body: req.file.buffer,
         ContentType: "image/jpeg",
         ACL: "public-read", // Make file public
       };
