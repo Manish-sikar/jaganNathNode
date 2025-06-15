@@ -227,7 +227,7 @@ const PartnerRegister = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const JN_Id = await randomNumber();
+        const JN_Id = await randomNumber();
 
     const newUser = new Partner({
       fullName,
@@ -290,7 +290,6 @@ const GetPartnerRegister = async (req, res) => {
 const updatePartnerRegister = async (req, res) => {
   try {
     const { _id, ...updateData } = req.body;
-
     if (!_id) {
       return res.status(400).json({ error: "Partner ID is required" });
     }
@@ -304,7 +303,7 @@ const updatePartnerRegister = async (req, res) => {
     if (req.file) {
       // Delete old image from S3 if exists
       if (existingPartner.Avtar) {
-        const oldImageKey = existingPartner.Avtar.split(`${process.env.AWS_BUCKET_NAME}/`)[1];
+        const oldImageKey = existingPartner?.Avtar.split(`${process.env.AWS_BUCKET_NAME}/`)[1];
         if (oldImageKey) {
           try {
             await s3
