@@ -86,18 +86,14 @@ const partnerData = await Partner.findOne({ JN_Id: partnerEmail });
     const document3Url = req.files["document3"]
       ? await uploadFileToS3(req.files["document3"][0], "documents")
       : null;
-
-    await UserApplyFormModel.updateMany(
-      { partnerEmail }, // Match based on partnerEmail
-      { $set: { status: 1 } }
-    );
+ 
 
     // Generate a unique token for the form
     const generateToken = () => {
       return crypto.randomInt(100000, 999999).toString(); // Generates a 6-digit random number
     };
     const Token_NO = generateToken();
-     UserApplyFormModel.collection.dropIndex("email_1").then(() => {
+     UserApplyFormModel.collection.dropIndex("panCard_1").then(() => {
  console.log("Unique index on email dropped successfully!");
 }).catch(err => {
  console.log("Error dropping index:", err);
