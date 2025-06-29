@@ -6,14 +6,12 @@ const Partner = require("../models/userRegModel");
 const TransactionHistory = require("../models/TransactionHistory");
 const crypto = require("crypto");
 
-
 // AWS S3 Configuration
 const s3 = new AWS.S3({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   region: process.env.AWS_REGION,
 });
-
 
 const postUserApplyForm = async (req, res) => {
   try {
@@ -47,7 +45,7 @@ const postUserApplyForm = async (req, res) => {
     ) {
       return res.status(400).json({ err: "All fields are required." });
     }
-const partnerData = await Partner.findOne({ JN_Id: partnerEmail });
+    const partnerData = await Partner.findOne({ JN_Id: partnerEmail });
     if (!partnerData) {
       return res.status(404).json({ err: "Partner not found." });
     }
@@ -64,7 +62,9 @@ const partnerData = await Partner.findOne({ JN_Id: partnerEmail });
     const uploadFileToS3 = async (file, folder) => {
       if (!file) return null; // If no file is provided, return null
 
-      const uniqueFilename = `${folder}/${Date.now()}_${uuidv4()}_${file.originalname}`;
+      const uniqueFilename = `${folder}/${Date.now()}_${uuidv4()}_${
+        file.originalname
+      }`;
       const uploadParams = {
         Bucket: process.env.AWS_BUCKET_NAME,
         Key: uniqueFilename,
@@ -72,7 +72,7 @@ const partnerData = await Partner.findOne({ JN_Id: partnerEmail });
         ContentType: file.mimetype,
         ACL: "public-read",
       };
- const uploadResult = await s3.upload(uploadParams).promise();
+      const uploadResult = await s3.upload(uploadParams).promise();
       return uploadResult.Location; // Return the public URL of the uploaded file
     };
 
@@ -86,22 +86,22 @@ const partnerData = await Partner.findOne({ JN_Id: partnerEmail });
     const document3Url = req.files["document3"]
       ? await uploadFileToS3(req.files["document3"][0], "documents")
       : null;
- 
 
     // Generate a unique token for the form
     const generateToken = () => {
       return crypto.randomInt(100000, 999999).toString(); // Generates a 6-digit random number
     };
     const Token_NO = generateToken();
-     UserApplyFormModel.collection.dropIndex("panCard_1").then(() => {
- console.log("Unique index on email dropped successfully!");
-}).catch(err => {
- console.log("Error dropping index:", err);
-});
+    UserApplyFormModel.collection
+      .dropIndex("panCard_1")
+      .then(() => {
+        console.log("Unique index on email dropped successfully!");
+      })
+      .catch((err) => {
+        console.log("Error dropping index:", err);
+      });
 
-
-    
-// Create a new instance of UserApplyFormModel
+    // Create a new instance of UserApplyFormModel
     const userForm = new UserApplyFormModel({
       partnerEmail,
       fullName,
@@ -123,7 +123,7 @@ const partnerData = await Partner.findOne({ JN_Id: partnerEmail });
     // Save the data to the database
     await userForm.save();
 
-        // Deduct balance once, before Save the data to the database
+    // Deduct balance once, before Save the data to the database
     const updatedBalance = AvailableBalance - amount;
     await Partner.findOneAndUpdate(
       { JN_Id: partnerEmail },
@@ -131,15 +131,13 @@ const partnerData = await Partner.findOne({ JN_Id: partnerEmail });
       { new: true }
     );
 
-    
-
     // Save transaction history
-     const transaction = new TransactionHistory({
+    const transaction = new TransactionHistory({
       JN_Id: partnerEmail,
       amountDeducted: amount,
       availableBalanceAfter: updatedBalance,
       purpose: `Applied for ${subCategory} under ${category} category.`,
-      amountType: "debit"
+      amountType: "debit",
     });
 
     await transaction.save(); // Save to DB
@@ -147,15 +145,15 @@ const partnerData = await Partner.findOne({ JN_Id: partnerEmail });
       message: "User application form data saved successfully!",
       user_balance: updatedBalance,
       form_user_id: Token_NO,
+      partnerEmail:partnerEmail
     });
   } catch (error) {
     console.error("Error in postUserApplyForm:", error);
     return res
       .status(500)
-      .json({ err: "An error occurred while processing the request." });
-}
+      .json({ err: "An error occurred while processing the request." });
+  }
 };
- 
 
 const getUserApplyForm = async (req, res) => {
   try {
@@ -474,7 +472,6 @@ const updateUserApplyForm = async (req, res) => {
       .json({ err: "An error occurred while updating the form." });
   }
 };
-
 
 module.exports = {
   postUserApplyForm,

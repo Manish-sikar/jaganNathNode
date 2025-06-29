@@ -102,6 +102,7 @@ const {
   postUserApplyFormChangeStatus,
   getTransitionHistory,
 } = require("../controller/reportStatusController");
+const { postlinkWithHttpData, getlinkWithHttpData, deletelinkWithHttpData } = require("../controller/linkWithHttpDataController");
 
 // const storage = multer.diskStorage({
 //     destination: (req, file, cb) => {
@@ -275,5 +276,10 @@ router.post("/addAmountByAdmin", AddAmountByAdmin);
 router.post("/SumbitPaymentDetails", SumbitPaymentDetails);
 router.get("/getPaymentDetails", getPaymentDetails);
 router.put("/updatePaymentStatus", updatePaymentStatus);
+
+// Contact Us  formapis routes
+router.post("/linkWithHttpData", postlinkWithHttpData);
+router.get("/linkWithHttpData", getlinkWithHttpData);
+router.delete("/linkWithHttpData/:id", deletelinkWithHttpData);
 
 module.exports = router;

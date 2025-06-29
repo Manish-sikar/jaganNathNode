@@ -50,6 +50,8 @@ const AdminLoginpost = async (req, res) => {
     if (!UserName || !password) {
       return res.status(400).json({ error: "All fields are required" });
     }
+  
+
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10); // 10 is the salt rounds
