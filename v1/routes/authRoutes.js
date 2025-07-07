@@ -5,6 +5,10 @@ const {
   SumbitPaymentDetails,
   getPaymentDetails,
   updatePaymentStatus,
+  addDelar,
+  getAllDelar,
+  deleteDelarRegister,
+  changePassDelarRegister,
 } = require("../controller/authController");
 
 const {
@@ -281,5 +285,13 @@ router.put("/updatePaymentStatus", updatePaymentStatus);
 router.post("/linkWithHttpData", postlinkWithHttpData);
 router.get("/linkWithHttpData", getlinkWithHttpData);
 router.delete("/linkWithHttpData/:id", deletelinkWithHttpData);
+
+//add and get delar data 
+
+router.post("/addDelar", addDelar);
+router.get("/getAllDelar", getAllDelar);
+
+router.post("/deleteDelarRegister/:id",  deleteDelarRegister);
+router.post("/changePassDelarRegister", changePassDelarRegister);
 
 module.exports = router;

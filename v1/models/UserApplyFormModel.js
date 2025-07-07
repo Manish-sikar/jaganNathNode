@@ -90,6 +90,9 @@ const UserApplyFormSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+     userDelar_id: {
+      type: String,
+    },
     createdAt: {
       type: Date,
       default: Date.now,

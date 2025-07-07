@@ -27,6 +27,8 @@ const postUserApplyForm = async (req, res) => {
       category,
       subCategory,
       amount,
+      userDelar_id
+
     } = req.body;
 
     // Validate required fields
@@ -118,6 +120,7 @@ const postUserApplyForm = async (req, res) => {
       document2: document2Url,
       document3: document3Url,
       status: 1,
+      userDelar_id
     });
 
     // Save the data to the database
@@ -145,7 +148,7 @@ const postUserApplyForm = async (req, res) => {
       message: "User application form data saved successfully!",
       user_balance: updatedBalance,
       form_user_id: Token_NO,
-      partnerEmail:partnerEmail
+      partnerEmail: partnerEmail,
     });
   } catch (error) {
     console.error("Error in postUserApplyForm:", error);
@@ -158,7 +161,15 @@ const postUserApplyForm = async (req, res) => {
 const getUserApplyForm = async (req, res) => {
   try {
     // Retrieve all contact form details
-    const userFormDetails = await UserApplyFormModel.find();
+
+    const { create_id } = req.query;
+    console.log(create_id ,"create_id")
+    let userFormDetails;
+    if (create_id) {
+      userFormDetails = await UserApplyFormModel.find({ userDelar_id:create_id });
+    } else {
+      userFormDetails = await UserApplyFormModel.find();
+    }
 
     // Check if there are no records in the database
     if (userFormDetails.length === 0) {
@@ -177,6 +188,30 @@ const getUserApplyForm = async (req, res) => {
     return res.status(500).json({
       error: "An internal server error occurred.",
     });
+  }
+};
+
+const GetPartnerRegister = async (req, res) => {
+  try {
+    const { create_id } = req.query;
+
+    let partnerDetails;
+    if (create_id) {
+      partnerDetails = await Partner.find({ create_id });
+    } else {
+      partnerDetails = await Partner.find();
+    }
+
+    // Instead of 404, just return empty list with message
+    res.status(200).json({
+      partner_Data: partnerDetails || [],
+      message: partnerDetails?.length
+        ? "Partner Details found successfully!"
+        : "No partner data found.",
+    });
+  } catch (error) {
+    console.error("Error fetching partner data:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 

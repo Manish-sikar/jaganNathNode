@@ -37,8 +37,9 @@ const PartnerLogin = async (req, res) => {
       user_Id: user._id,
       user_name: user.fullName,
       email: user.JN_Id,
-       user_balance: user.balance,
+      user_balance: user.balance,
       phone: user.phone,
+      Delar_Id: user.create_id,
     });
   } catch (error) {
     console.error("Error logging in:", error);
@@ -183,6 +184,7 @@ const PartnerRegister = async (req, res) => {
       aadharNo,
       password,
       acDetails,
+      create_id
     } = req.body;
 
     if (
@@ -241,6 +243,7 @@ const PartnerRegister = async (req, res) => {
       aadharNo,
       JN_Id: `POS${JN_Id}`,
       password: hashedPassword,
+      create_id:create_id||""
     });
 
     // Add optional fields
@@ -266,27 +269,67 @@ const PartnerRegister = async (req, res) => {
 
 
 
-const GetPartnerRegister = async (req, res) => {
-  try {
-    // Check if the user exists in the database
-    const partnerDetails = await Partner.find();
-    if (!partnerDetails) {
-      return res.status(404).json({ error: "Partner details are not found " });
-    }
-    res.status(200).json({
-      partner_Data: partnerDetails,
-      message: "Partner Details found sucessfully !! ",
-    });
-  } catch (error) {
-    console.error("Error logging in:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
+// const GetPartnerRegister = async (req, res) => {
+//   try {
+//     // Check if the user exists in the database
+//     console.log(req.query)
+//     const user_id  = req?.query
+//     let partnerDetails
+//     if (user_id){
+//      partnerDetails = await Partner.find({create_id:user_id});
+//     if (!partnerDetails) {
+//       return res.status(404).json({ error: "Partner details are not found " });
+//     }
+//     }
+//       if (!user_id){
+//      partnerDetails = await Partner.find();
+//     if (!partnerDetails) {
+//       return res.status(404).json({ error: "Partner details are not found " });
+//     }
+//     }
+//     // console.log(req)
+
+//     res.status(200).json({
+//       partner_Data: partnerDetails,
+//       message: "Partner Details found sucessfully !! ",
+//     });
+//   } catch (error) {
+//     console.error("Error logging in:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
 
 
 
 
 // Update Partner Details
+
+
+const GetPartnerRegister = async (req, res) => {
+  try {
+    const { create_id } = req.query;
+
+    let partnerDetails;
+    if (create_id) {
+      partnerDetails = await Partner.find({ create_id });
+    } else {
+      partnerDetails = await Partner.find();
+    }
+
+    // Instead of 404, just return empty list with message
+    res.status(200).json({
+      partner_Data: partnerDetails || [],
+      message: partnerDetails?.length
+        ? "Partner Details found successfully!"
+        : "No partner data found.",
+    });
+  } catch (error) {
+    console.error("Error fetching partner data:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
 const updatePartnerRegister = async (req, res) => {
   try {
     const { _id, ...updateData } = req.body;

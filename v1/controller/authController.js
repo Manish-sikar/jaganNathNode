@@ -33,6 +33,7 @@ const AdminLogin = async (req, res) => {
       token,
       user_Id: user._id,
       admin_name: user.UserName,
+      status:user.status
     });
   } catch (error) {
     console.error("Error logging in:", error);
@@ -40,22 +41,18 @@ const AdminLogin = async (req, res) => {
   }
 };
 
-
-
 const AdminLoginpost = async (req, res) => {
   try {
     const { UserName, password } = req.body;
- 
+
     // Validate input
     if (!UserName || !password) {
       return res.status(400).json({ error: "All fields are required" });
     }
-  
-
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10); // 10 is the salt rounds
- 
+
     // Save the new user to the database
     let newUser = new LoginModel({
       UserName,
@@ -68,9 +65,6 @@ const AdminLoginpost = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
-
-
 
 const AddAmountByAdmin = async (req, res) => {
   try {
@@ -103,21 +97,24 @@ const AddAmountByAdmin = async (req, res) => {
       requestingAmount: Number(amount),
       availableBalanceAfter: updatedBalance,
       purpose: String(remark),
-      amountType:"credit"
+      amountType: "credit",
     });
     // amountType: {
     //   type: String,
     //   enum: ["credit", "debit"],
     //   required: true,
     // }
-    
 
     await transaction.save();
 
-    return res.status(200).json({ message: "Amount added successfully!", updatedBalance });
+    return res
+      .status(200)
+      .json({ message: "Amount added successfully!", updatedBalance });
   } catch (error) {
     console.error("Error adding amount:", error);
-    return res.status(500).json({ error: "An error occurred while adding the amount." });
+    return res
+      .status(500)
+      .json({ error: "An error occurred while adding the amount." });
   }
 };
 
@@ -136,10 +133,14 @@ const SumbitPaymentDetails = async (req, res) => {
 
     await transaction.save(); // 🛠 Save the transaction to the database
 
-    res.status(200).json({ message: "Payment details submitted successfully." });
+    res
+      .status(200)
+      .json({ message: "Payment details submitted successfully." });
   } catch (error) {
     console.error("Error submitting payment details:", error);
-    res.status(500).json({ message: "Something went wrong while saving the transaction." });
+    res
+      .status(500)
+      .json({ message: "Something went wrong while saving the transaction." });
   }
 };
 
@@ -147,13 +148,15 @@ const getPaymentDetails = async (req, res) => {
   try {
     // Find transactions where Utr_No is not null or undefined
     const transactions = await TransactionHistory.find({
-      Utr_No: { $exists: true, $ne: null }
+      Utr_No: { $exists: true, $ne: null },
     }).sort({ createdAt: -1 });
 
     res.status(200).json({ requests: transactions });
   } catch (error) {
     console.error("Error fetching payment details:", error);
-    res.status(500).json({ message: "Something went wrong while fetching payment details." });
+    res.status(500).json({
+      message: "Something went wrong while fetching payment details.",
+    });
   }
 };
 
@@ -170,21 +173,19 @@ const updatePaymentStatus = async (req, res) => {
       return res.status(404).json({ message: "Transaction not found." });
     }
 
-
     // 2. Only allow status change from "pending"
     if (transaction.status !== "pending") {
       return res
         .status(400)
         .json({ message: "Only pending transactions can be updated." });
     }
- 
+
     // 3. Try to find the partner using JN_Id first
     let partner = await Partner.findOne({ JN_Id: transaction.JN_Id });
 
     if (!partner) {
       return res.status(404).json({ message: "Partner not found." });
     }
-
 
     // 5. Credit the amount to partner's wallet
     const currentBalance = Number(partner.balance || 0);
@@ -215,9 +216,118 @@ const updatePaymentStatus = async (req, res) => {
   }
 };
 
+// add delar data
 
+const addDelar = async (req, res) => {
+  try {
+    console.log(req.body);
+    const { email, password } = req.body;
 
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
 
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10); // 10 is the salt rounds
 
-module.exports = { AdminLogin , AdminLoginpost , AddAmountByAdmin , 
-  SumbitPaymentDetails , getPaymentDetails , updatePaymentStatus};
+    // Save the new user to the database
+    let newUser = new LoginModel({
+      UserName: email,
+      password: hashedPassword,
+      status: 2,
+    });
+    await newUser.save();
+    res.status(201).json({ message: "Delar created successfully" });
+  } catch (error) {
+    console.error("Error creating user:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const getAllDelar = async (req, res) => {
+  try {
+    // {
+    //   "UserName":"manish@gmail.com",
+    //   "password":"Manish@1#2"
+    //  }
+
+    const status = "2";
+    // Check if the user exists in the database
+    const user = await LoginModel.find({ status });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    console.log(user, "user");
+    res.status(200).json({
+      DelarData: user,
+    });
+  } catch (error) {
+    console.error("Error logging in:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Delete Partner
+const deleteDelarRegister = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: "Partner ID is required" });
+    }
+    const status = "33";
+    const deletedPartner = await LoginModel.findByIdAndUpdate(id, {
+      status: status,
+    });
+
+    if (!deletedPartner) {
+      return res.status(404).json({ error: "Partner not found" });
+    }
+
+    res.status(200).json({ message: "Partner deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting partner:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Change Partner Password
+const changePassDelarRegister = async (req, res) => {
+  try {
+    const { id, newPassword } = req.body;
+
+    if (!id || !newPassword) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    const partner = await LoginModel.findById(id);
+
+    if (!partner) {
+      return res.status(404).json({ error: "Delar not found" });
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    partner.password = hashedNewPassword;
+    await partner.save();
+
+    res.status(200).json({ message: "Password changed successfully" });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+module.exports = {
+  AdminLogin,
+  AdminLoginpost,
+  AddAmountByAdmin,
+  SumbitPaymentDetails,
+  getPaymentDetails,
+  updatePaymentStatus,
+  addDelar,
+  getAllDelar,
+  deleteDelarRegister,
+  changePassDelarRegister
+};

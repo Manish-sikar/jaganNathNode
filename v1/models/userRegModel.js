@@ -59,6 +59,9 @@ const partnerSchema = new mongoose.Schema({
   acDetails: {
     type: String,
   },
+  create_id:{
+     type: String,
+  }
 });
 
 // Create and export the Partner model
