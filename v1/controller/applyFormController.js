@@ -147,23 +147,16 @@ const postUserApplyForm = async (req, res) => {
     await transaction.save(); // Save to DB
 
     // process with comission amount add in delar a/c
-const user111 = await LoginModel.find();
-console.log(user111 , "user111")
-    // get email from usermodel
-console.log(userDelar_id , "userDelar_id")
+ 
     const user = await LoginModel.findOne({ _id: userDelar_id });
-console.log(user , "use222222")
     if (user) {
       const getEmail = user?.UserName;
-console.log(getEmail , "getEmail")
 
       const partnerData = await Partner.findOne({ email: getEmail });
-      console.log(partnerData , "partnerData")
 
       if (partnerData) {
         let AvailableBalance = Number(partnerData?.balance) || 0;
         const updatedBalance = AvailableBalance + Number(DelarAmount);
-console.log(updatedBalance , "updatedBalance")
 
         // Update balance
         await Partner.findOneAndUpdate(
