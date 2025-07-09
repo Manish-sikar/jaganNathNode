@@ -20,6 +20,10 @@ const loanSchema = new mongoose.Schema({
     type: String,
     required: true, // amount for the loan product
   },
+    DelarAmount: {
+    type: String,
+    required: true, // amount for the loan product
+  },
   link: {
     type: String,
     required: true, // URL link for the loan product

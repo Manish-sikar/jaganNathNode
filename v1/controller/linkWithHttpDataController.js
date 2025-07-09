@@ -3,8 +3,20 @@ const linkWithHttpModel = require("../models/linkWithHttpModel");
 
 const postlinkWithHttpData = async (req, res) => {
   try {
-    console.log(req.body , "gsdjgfasjg")
-    const { fullName, email, phone, panCard, fullAddress } = req.body;
+    console.log(req.body, "gsdjgfasjg");
+    const {
+      fullName,
+      email,
+      phone,
+      panCard,
+      fullAddress,
+      category,
+      subcategory,
+      amount,
+      DelarAmount,
+      userDelar_id,
+      partnerEmail,
+    } = req.body;
 
     // Validate required fields
     if (!fullName || !panCard || !email || !phone || !fullAddress) {
@@ -20,12 +32,18 @@ const postlinkWithHttpData = async (req, res) => {
       phone,
       panCard,
       fullAddress,
-      status : 1
+      status: 1,
+      category,
+      subcategory,
+      amount,
+      DelarAmount,
+      userDelar_id,
+      partnerEmail,
     });
- 
 
     // Save the contact form data to the database
     await linkWithHttpData.save();
+
 
     // Send a success response
     return res.status(201).json({
@@ -42,7 +60,7 @@ const postlinkWithHttpData = async (req, res) => {
 const getlinkWithHttpData = async (req, res) => {
   try {
     // Check if the user exists in the database
-    const linkWithHttpDetails = await linkWithHttpModel.find({status:1});
+    const linkWithHttpDetails = await linkWithHttpModel.find({ status: 1 });
     if (!linkWithHttpDetails) {
       return res
         .status(404)

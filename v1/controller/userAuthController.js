@@ -33,7 +33,7 @@ const PartnerLogin = async (req, res) => {
 
     // Return a successful response with user details and token
     res.status(200).json({
-      token,
+      token1:token,
       user_Id: user._id,
       user_name: user.fullName,
       email: user.JN_Id,
@@ -149,6 +149,7 @@ const PartnerLogin = async (req, res) => {
 
 const AWS = require("aws-sdk");
 const { v4: uuidv4 } = require("uuid");
+const LoginModel = require("../models/authModel");
 
 // AWS S3 Config
 const s3 = new AWS.S3({
@@ -316,10 +317,27 @@ const GetPartnerRegister = async (req, res) => {
       partnerDetails = await Partner.find();
     }
 
-    // Instead of 404, just return empty list with message
+    // If there are partners, fetch UserName for each create_id
+    const partnerWithUserName = await Promise.all(
+      partnerDetails.map(async (partner) => {
+        let userName = null;
+        if (partner.create_id) {
+          const loginDoc = await LoginModel.findById(partner.create_id).lean();
+          if (loginDoc) {
+            userName = loginDoc.UserName;
+          }
+        }
+        // return partner data + userName field
+        return {
+          ...partner.toObject(), // convert mongoose doc to plain object
+          createUserName: userName, // add new field
+        };
+      })
+    );
+
     res.status(200).json({
-      partner_Data: partnerDetails || [],
-      message: partnerDetails?.length
+      partner_Data: partnerWithUserName || [],
+      message: partnerWithUserName?.length
         ? "Partner Details found successfully!"
         : "No partner data found.",
     });
@@ -328,6 +346,7 @@ const GetPartnerRegister = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 
 const updatePartnerRegister = async (req, res) => {

@@ -5,6 +5,7 @@ const { v4: uuidv4 } = require("uuid");
 const Partner = require("../models/userRegModel");
 const TransactionHistory = require("../models/TransactionHistory");
 const crypto = require("crypto");
+const LoginModel = require("../models/authModel");
 
 // AWS S3 Configuration
 const s3 = new AWS.S3({
@@ -27,8 +28,8 @@ const postUserApplyForm = async (req, res) => {
       category,
       subCategory,
       amount,
-      userDelar_id
-
+      userDelar_id,
+      DelarAmount,
     } = req.body;
 
     // Validate required fields
@@ -120,7 +121,7 @@ const postUserApplyForm = async (req, res) => {
       document2: document2Url,
       document3: document3Url,
       status: 1,
-      userDelar_id
+      userDelar_id,
     });
 
     // Save the data to the database
@@ -144,6 +145,46 @@ const postUserApplyForm = async (req, res) => {
     });
 
     await transaction.save(); // Save to DB
+
+    // process with comission amount add in delar a/c
+const user111 = await LoginModel.find();
+console.log(user111 , "user111")
+    // get email from usermodel
+console.log(userDelar_id , "userDelar_id")
+    const user = await LoginModel.findOne({ _id: userDelar_id });
+console.log(user , "use222222")
+    if (user) {
+      const getEmail = user?.UserName;
+console.log(getEmail , "getEmail")
+
+      const partnerData = await Partner.findOne({ email: getEmail });
+      console.log(partnerData , "partnerData")
+
+      if (partnerData) {
+        let AvailableBalance = Number(partnerData?.balance) || 0;
+        const updatedBalance = AvailableBalance + Number(DelarAmount);
+console.log(updatedBalance , "updatedBalance")
+
+        // Update balance
+        await Partner.findOneAndUpdate(
+          { email: partnerData.email },
+          { balance: updatedBalance },
+          { new: true }
+        );
+
+        // Save transaction history
+        const transaction = new TransactionHistory({
+          JN_Id: partnerData.JN_Id,
+          requestingAmount: Number(DelarAmount),
+          availableBalanceAfter: updatedBalance,
+          purpose: `Get incentive: Your Partner ${partnerEmail} applied for ${subCategory} under ${category} category.`,
+          amountType: "credit",
+        });
+
+        await transaction.save(); // Only save if partnerData found
+      }
+    }
+
     return res.status(201).json({
       message: "User application form data saved successfully!",
       user_balance: updatedBalance,
@@ -163,10 +204,12 @@ const getUserApplyForm = async (req, res) => {
     // Retrieve all contact form details
 
     const { create_id } = req.query;
-    console.log(create_id ,"create_id")
+    console.log(create_id, "create_id");
     let userFormDetails;
     if (create_id) {
-      userFormDetails = await UserApplyFormModel.find({ userDelar_id:create_id });
+      userFormDetails = await UserApplyFormModel.find({
+        userDelar_id: create_id,
+      });
     } else {
       userFormDetails = await UserApplyFormModel.find();
     }

@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-  
+
 // Define the schema
 const linkWithHttpSchema = new mongoose.Schema(
   {
@@ -25,7 +25,32 @@ const linkWithHttpSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-      status: {
+    category: {
+      type: String,
+      trim: true,
+    },
+
+    subcategory: {
+      type: String,
+      trim: true,
+    },
+    amount: {
+      type: String,
+      trim: true,
+    },
+    DelarAmount: {
+      type: String,
+      trim: true,
+    },
+    userDelar_id: {
+      type: String,
+      trim: true,
+    },
+    partnerEmail: {
+      type: String,
+      trim: true,
+    },
+    status: {
       type: Number,
       default: 1, // Default status
     },
