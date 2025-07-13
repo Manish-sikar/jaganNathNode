@@ -42,7 +42,7 @@ const PartnerLogin = async (req, res) => {
       user_balance: user.balance,
       phone: user.phone,
       Delar_Id: user.create_id,
-      status:user.status
+      status:parseInt(user.status)
     });
   } catch (error) {
     console.error("Error logging in:", error);
@@ -243,7 +243,7 @@ const PartnerRegister = async (req, res) => {
       fullJanId = `POS${JN_Id}`;
        statusq = 1
     }
-await Partner.updateMany({}, { $set: { status: 1 } });
+ 
 
     const newUser = new Partner({
       fullName,
