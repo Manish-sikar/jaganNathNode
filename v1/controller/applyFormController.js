@@ -152,13 +152,12 @@ console.log(cleanedUserDelar_id , "cleanedUserDelar_id")
     await transaction.save(); // Save to DB
 
     // process with comission amount add in delar a/c
-      const DelarData = await Partner.findOne({ JN_Id: userDelar_id });
- 
+      const DelarData = await Partner.findOne({ JN_Id: cleanedUserDelar_id });
     if (DelarData) {
       if (DelarData) {
         let AvailableBalance = Number(DelarData?.balance) || 0;
+
         const updatedBalance = AvailableBalance + Number(DelarAmount);
-console.log(updatedBalance ,"updatedBalance"  )
         // Update balance
         await Partner.findOneAndUpdate(
           { JN_Id: DelarData.JN_Id },
