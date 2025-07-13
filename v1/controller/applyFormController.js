@@ -95,16 +95,21 @@ const postUserApplyForm = async (req, res) => {
       return crypto.randomInt(100000, 999999).toString(); // Generates a 6-digit random number
     };
     const Token_NO = generateToken();
-    UserApplyFormModel.collection
-      .dropIndex("panCard_1")
-      .then(() => {
-        console.log("Unique index on email dropped successfully!");
-      })
-      .catch((err) => {
-        console.log("Error dropping index:", err);
-      });
-
+    // UserApplyFormModel.collection
+    //   .dropIndex("panCard_1")
+    //   .then(() => {
+    //     console.log("Unique index on email dropped successfully!");
+    //   })
+    //   .catch((err) => {
+    //     console.log("Error dropping index:", err);
+    //   });
+console.log(userDelar_id , "userDelar_id")
+const cleanedUserDelar_id = typeof userDelar_id === 'string'
+  ? userDelar_id.replace(/^"+|"+$/g, '')
+  : userDelar_id;
     // Create a new instance of UserApplyFormModel
+console.log(cleanedUserDelar_id , "cleanedUserDelar_id")
+
     const userForm = new UserApplyFormModel({
       partnerEmail,
       fullName,
@@ -121,7 +126,7 @@ const postUserApplyForm = async (req, res) => {
       document2: document2Url,
       document3: document3Url,
       status: 1,
-      userDelar_id,
+      userDelar_id:cleanedUserDelar_id
     });
 
     // Save the data to the database
@@ -147,27 +152,23 @@ const postUserApplyForm = async (req, res) => {
     await transaction.save(); // Save to DB
 
     // process with comission amount add in delar a/c
+      const DelarData = await Partner.findOne({ JN_Id: userDelar_id });
  
-    const user = await LoginModel.findOne({ _id: userDelar_id });
-    if (user) {
-      const getEmail = user?.UserName;
-
-      const partnerData = await Partner.findOne({ email: getEmail });
-
-      if (partnerData) {
-        let AvailableBalance = Number(partnerData?.balance) || 0;
+    if (DelarData) {
+      if (DelarData) {
+        let AvailableBalance = Number(DelarData?.balance) || 0;
         const updatedBalance = AvailableBalance + Number(DelarAmount);
-
+console.log(updatedBalance ,"updatedBalance"  )
         // Update balance
         await Partner.findOneAndUpdate(
-          { email: partnerData.email },
+          { JN_Id: DelarData.JN_Id },
           { balance: updatedBalance },
           { new: true }
         );
 
         // Save transaction history
         const transaction = new TransactionHistory({
-          JN_Id: partnerData.JN_Id,
+          JN_Id: DelarData.JN_Id,
           requestingAmount: Number(DelarAmount),
           availableBalanceAfter: updatedBalance,
           purpose: `Get incentive: Your Partner ${partnerEmail} applied for ${subCategory} under ${category} category.`,
@@ -206,7 +207,7 @@ const getUserApplyForm = async (req, res) => {
     } else {
       userFormDetails = await UserApplyFormModel.find();
     }
-
+  const userFormDetails111 = await UserApplyFormModel.find();
     // Check if there are no records in the database
     if (userFormDetails.length === 0) {
       return res.status(404).json({

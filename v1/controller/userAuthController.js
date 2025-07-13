@@ -1,13 +1,15 @@
-const { comparePassword, JwtCreate ,randomNumber} = require("../services/authServices");
+const {
+  comparePassword,
+  JwtCreate,
+  randomNumber,
+} = require("../services/authServices");
 const bcrypt = require("bcrypt");
 const Partner = require("../models/userRegModel");
-
-
 
 const PartnerLogin = async (req, res) => {
   try {
     const { emailORphone, password } = req.body;
-    
+
     // Validate input
     if (!emailORphone || !password) {
       return res.status(400).json({ error: "All fields are required" });
@@ -33,21 +35,20 @@ const PartnerLogin = async (req, res) => {
 
     // Return a successful response with user details and token
     res.status(200).json({
-      token1:token,
+      token: token,
       user_Id: user._id,
       user_name: user.fullName,
       email: user.JN_Id,
       user_balance: user.balance,
       phone: user.phone,
       Delar_Id: user.create_id,
+      status:user.status
     });
   } catch (error) {
     console.error("Error logging in:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
-
 
 // const UserRegister = async (req, res) => {
 //   try {
@@ -121,7 +122,7 @@ const PartnerLogin = async (req, res) => {
 //     // Parse birthday if it's a string
 //     const parsedBirthday = new Date(birthday); // Ensure the birthday is a Date object
 //     // Create new user
-    
+
 //     const newUser = new Customer({
 //       firstName,
 //       lastName,
@@ -145,7 +146,6 @@ const PartnerLogin = async (req, res) => {
 //     res.status(500).json({ error: "Internal server error" });
 //   }
 // };
-
 
 const AWS = require("aws-sdk");
 const { v4: uuidv4 } = require("uuid");
@@ -185,7 +185,8 @@ const PartnerRegister = async (req, res) => {
       aadharNo,
       password,
       acDetails,
-      create_id
+      create_id,
+      status,
     } = req.body;
 
     if (
@@ -199,10 +200,12 @@ const PartnerRegister = async (req, res) => {
       !aadharNo ||
       !password
     ) {
-      return res.status(400).json({ error: "All required fields must be filled" });
+      return res
+        .status(400)
+        .json({ error: "All required fields must be filled" });
     }
 
-    console.log(req.body)
+    console.log(req.body);
 
     const existingUser = await Partner.findOne({
       $or: [{ mobile }, { email }, { panNo }, { aadharNo }],
@@ -230,7 +233,17 @@ const PartnerRegister = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-        const JN_Id = await randomNumber();
+    const JN_Id = await randomNumber();
+    let fullJanId;
+    let statusq
+    if (status == 2) {
+      fullJanId = `CSF${JN_Id}`;
+      statusq = 2
+    } else {
+      fullJanId = `POS${JN_Id}`;
+       statusq = 1
+    }
+await Partner.updateMany({}, { $set: { status: 1 } });
 
     const newUser = new Partner({
       fullName,
@@ -242,16 +255,18 @@ const PartnerRegister = async (req, res) => {
       message,
       panNo,
       aadharNo,
-      JN_Id: `POS${JN_Id}`,
+      JN_Id: fullJanId,
       password: hashedPassword,
-      create_id:create_id||""
+      create_id: create_id || "",
+      status :statusq
     });
 
     // Add optional fields
     if (imageUrl) newUser.Avtar = imageUrl;
     if (acDetails) newUser.acDetails = acDetails;
-
     await newUser.save();
+
+
 
     res.status(201).json({ message: "User created successfully" });
   } catch (error) {
@@ -266,9 +281,6 @@ const PartnerRegister = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
-
-
 
 // const GetPartnerRegister = async (req, res) => {
 //   try {
@@ -300,44 +312,52 @@ const PartnerRegister = async (req, res) => {
 //   }
 // };
 
-
-
-
 // Update Partner Details
-
 
 const GetPartnerRegister = async (req, res) => {
   try {
-    const { create_id } = req.query;
-
+   const { status, delar_id } = req.query;
+    console.log(req.query);
     let partnerDetails;
-    if (create_id) {
-      partnerDetails = await Partner.find({ create_id });
+
+    if (status && delar_id) {
+      // both present
+      partnerDetails = await Partner.find({ status: 1, create_id: delar_id });
+    } else if (status) {
+      // only status
+      partnerDetails = await Partner.find({ status: status });
     } else {
+      // neither
       partnerDetails = await Partner.find();
     }
 
+
+    
     // If there are partners, fetch UserName for each create_id
-    const partnerWithUserName = await Promise.all(
-      partnerDetails.map(async (partner) => {
-        let userName = null;
-        if (partner.create_id) {
-          const loginDoc = await LoginModel.findById(partner.create_id).lean();
-          if (loginDoc) {
-            userName = loginDoc.UserName;
-          }
-        }
-        // return partner data + userName field
-        return {
-          ...partner.toObject(), // convert mongoose doc to plain object
-          createUserName: userName, // add new field
-        };
-      })
-    );
+//     const partnerWithUserName = await Promise.all(
+//       partnerDetails.map(async (partner) => {
+//         let userName = null;
+//         let JN_Id = partner.create_id
+//         console.log(JN_Id ,"JN_Id")
+//         if (partner.create_id) {
+//  console.log(JN_Id ,"JN_Idmddd")
+
+//           const loginDoc = await Partner.findById(String(JN_Id))
+//           if (loginDoc) {
+//             userName = loginDoc.fullName;
+//           }
+//         }
+//         // return partner data + userName field
+//         return {
+//           ...partner.toObject(), // convert mongoose doc to plain object
+//           createUserName: userName, // add new field
+//         };
+//       })
+//     );
 
     res.status(200).json({
-      partner_Data: partnerWithUserName || [],
-      message: partnerWithUserName?.length
+      partner_Data: partnerDetails || [],
+      message: partnerDetails?.length
         ? "Partner Details found successfully!"
         : "No partner data found.",
     });
@@ -346,8 +366,6 @@ const GetPartnerRegister = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
-
 
 const updatePartnerRegister = async (req, res) => {
   try {
@@ -365,7 +383,9 @@ const updatePartnerRegister = async (req, res) => {
     if (req.file) {
       // Delete old image from S3 if exists
       if (existingPartner.Avtar) {
-        const oldImageKey = existingPartner?.Avtar.split(`${process.env.AWS_BUCKET_NAME}/`)[1];
+        const oldImageKey = existingPartner?.Avtar.split(
+          `${process.env.AWS_BUCKET_NAME}/`
+        )[1];
         if (oldImageKey) {
           try {
             await s3
@@ -382,11 +402,17 @@ const updatePartnerRegister = async (req, res) => {
 
       // Upload new image
       const fileName = `${uuidv4()}-${req.file.originalname}`;
-      const imageUrl = await uploadToS3(req.file.buffer, fileName, req.file.mimetype);
+      const imageUrl = await uploadToS3(
+        req.file.buffer,
+        fileName,
+        req.file.mimetype
+      );
       updateData.Avtar = imageUrl;
     }
 
-    const updatedPartner = await Partner.findByIdAndUpdate(_id, updateData, { new: true });
+    const updatedPartner = await Partner.findByIdAndUpdate(_id, updateData, {
+      new: true,
+    });
 
     res.status(200).json({
       message: "Partner updated successfully",
@@ -397,7 +423,6 @@ const updatePartnerRegister = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
 
 // Delete Partner
 const deletePartnerRegister = async (req, res) => {
@@ -424,7 +449,7 @@ const deletePartnerRegister = async (req, res) => {
 // Change Partner Password
 const changePassPartnerRegister = async (req, res) => {
   try {
-    const { id , newPassword } =  req.body;
+    const { id, newPassword } = req.body;
 
     if (!id || !newPassword) {
       return res.status(400).json({ error: "All fields are required" });
@@ -435,7 +460,6 @@ const changePassPartnerRegister = async (req, res) => {
     if (!partner) {
       return res.status(404).json({ error: "Partner not found" });
     }
-
 
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
     partner.password = hashedNewPassword;
@@ -448,28 +472,31 @@ const changePassPartnerRegister = async (req, res) => {
   }
 };
 
- 
- 
 const GetSpecialpartnerData = async (req, res) => {
-try {
-  const { JN_Id } = req.body;
- 
-     const partnerDetails = await Partner.findOne({ JN_Id: JN_Id });
- 
-  if (!partnerDetails) {
-    return res.status(404).json({ error: "Partner details are not found " });
+  try {
+    const { JN_Id } = req.body;
+
+    const partnerDetails = await Partner.findOne({ JN_Id: JN_Id });
+
+    if (!partnerDetails) {
+      return res.status(404).json({ error: "Partner details are not found " });
+    }
+    res.status(200).json({
+      partner_Data: partnerDetails,
+      message: "Partner Details found sucessfully !! ",
+    });
+  } catch (error) {
+    console.error("Error logging in:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
-  res.status(200).json({
-    partner_Data: partnerDetails,
-    message: "Partner Details found sucessfully !! ",
-  });
-} catch (error) {
-  console.error("Error logging in:", error);
-  res.status(500).json({ error: "Internal server error" });
-}
 };
 
-
-module.exports = { PartnerLogin, PartnerRegister , GetPartnerRegister ,  updatePartnerRegister,
+module.exports = {
+  PartnerLogin,
+  PartnerRegister,
+  GetPartnerRegister,
+  updatePartnerRegister,
   deletePartnerRegister,
-  changePassPartnerRegister,GetSpecialpartnerData};
+  changePassPartnerRegister,
+  GetSpecialpartnerData,
+};
