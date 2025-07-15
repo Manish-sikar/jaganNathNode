@@ -103,12 +103,10 @@ const postUserApplyForm = async (req, res) => {
     //   .catch((err) => {
     //     console.log("Error dropping index:", err);
     //   });
-console.log(userDelar_id , "userDelar_id")
 const cleanedUserDelar_id = typeof userDelar_id === 'string'
   ? userDelar_id.replace(/^"+|"+$/g, '')
   : userDelar_id;
     // Create a new instance of UserApplyFormModel
-console.log(cleanedUserDelar_id , "cleanedUserDelar_id")
 
     const userForm = new UserApplyFormModel({
       partnerEmail,
