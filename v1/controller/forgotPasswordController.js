@@ -54,14 +54,14 @@ const storeOTP = async (email, otp) => {
       const currentYear = new Date().getFullYear();
       // Email options
       const mailOptions = {
-        from: '"Jashnath Finance" <no-reply@jashnatgfinance.in>',
+        from: '"Jasnath Finance" <no-reply@jasnathfinance.in>',
         to: email,
-        subject: "Jashnath Finance Change Password Verification",
+        subject: "Jasnath Finance Change Password Verification",
         html: `
         <table width="100%" cellpadding="0" cellspacing="0" style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
       <tr style="background-color: #004aad;">
         <td style="padding: 20px; text-align: center; color: #fff;">
-          <h2 style="margin: 0;">Jashnath Finance</h2>
+          <h2 style="margin: 0;">Jasnath Finance</h2>
           <p style="margin: 5px 0 0; font-size: 14px;">Your Trusted Loan Partner</p>
         </td>
       </tr>
@@ -70,7 +70,7 @@ const storeOTP = async (email, otp) => {
           <h3 style="color: #333; margin-top: 0;">Verify Your Password Change</h3>
           <p style="font-size: 15px; color: #555;">
             Dear Customer,<br><br>
-            We received a request to change the password of your <strong>Jashnath Finance</strong> account.
+            We received a request to change the password of your <strong>Jasnath Finance</strong> account.
           </p>
           <p style="font-size: 16px; text-align: center; margin: 20px 0;">
             <span style="display: inline-block; background-color: #004aad; color: #fff; padding: 10px 20px; border-radius: 4px; font-size: 20px; letter-spacing: 2px;">
@@ -84,14 +84,14 @@ const storeOTP = async (email, otp) => {
             If you didn’t request this change, please ignore this email or contact our support immediately.
           </p>
           <p style="font-size: 14px; color: #888; margin-top: 30px;">
-            Thank you for choosing <strong>Jashnath Finance</strong>.<br>
+            Thank you for choosing <strong>Jasnath Finance</strong>.<br>
             We’re always here to help you achieve your financial goals!
           </p>
         </td>
       </tr>
       <tr style="background-color: #f4f4f4;">
         <td style="padding: 15px; text-align: center; font-size: 12px; color: #888;">
-          &copy; ${currentYear} Jashnath Finance. All rights reserved.
+          &copy; ${currentYear} Jasnath Finance. All rights reserved.
         </td>
       </tr>
     </table>
