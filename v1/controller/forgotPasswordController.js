@@ -22,6 +22,11 @@ const storeOTP = async (email, otp) => {
   // Send OTP
   const forgotPasswordSendOtp = async (req, res) => {
     const { email } = req.body;
+
+    // jasnathfinance@gmail.com
+    // haiw ekbi mpyp vprj
+
+
     console.log(email, "email");
   
     if (!email) return res.status(400).json({ message: "Email is required" });
@@ -46,12 +51,51 @@ const storeOTP = async (email, otp) => {
         tls: { rejectUnauthorized: false },
       });
   
+      const currentYear = new Date().getFullYear();
       // Email options
       const mailOptions = {
         from: '"Jashnath Finance" <no-reply@jashnatgfinance.in>',
         to: email,
         subject: "Jashnath Finance Change Password Verification",
-        html: `<p>Your OTP is <b>${otp}</b>. It will expire in 5 minutes.</p>`,
+        html: `
+        <table width="100%" cellpadding="0" cellspacing="0" style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+      <tr style="background-color: #004aad;">
+        <td style="padding: 20px; text-align: center; color: #fff;">
+          <h2 style="margin: 0;">Jashnath Finance</h2>
+          <p style="margin: 5px 0 0; font-size: 14px;">Your Trusted Loan Partner</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 30px;">
+          <h3 style="color: #333; margin-top: 0;">Verify Your Password Change</h3>
+          <p style="font-size: 15px; color: #555;">
+            Dear Customer,<br><br>
+            We received a request to change the password of your <strong>Jashnath Finance</strong> account.
+          </p>
+          <p style="font-size: 16px; text-align: center; margin: 20px 0;">
+            <span style="display: inline-block; background-color: #004aad; color: #fff; padding: 10px 20px; border-radius: 4px; font-size: 20px; letter-spacing: 2px;">
+              ${otp}
+            </span>
+          </p>
+          <p style="font-size: 15px; color: #555;">
+            Please use the above One-Time Password (OTP) to complete your password change. For your security, this OTP is valid only for the next <strong>5 minutes</strong>.
+          </p>
+          <p style="font-size: 15px; color: #555;">
+            If you didn’t request this change, please ignore this email or contact our support immediately.
+          </p>
+          <p style="font-size: 14px; color: #888; margin-top: 30px;">
+            Thank you for choosing <strong>Jashnath Finance</strong>.<br>
+            We’re always here to help you achieve your financial goals!
+          </p>
+        </td>
+      </tr>
+      <tr style="background-color: #f4f4f4;">
+        <td style="padding: 15px; text-align: center; font-size: 12px; color: #888;">
+          &copy; ${currentYear} Jashnath Finance. All rights reserved.
+        </td>
+      </tr>
+    </table>
+        `,
       };
   
       // Send email
