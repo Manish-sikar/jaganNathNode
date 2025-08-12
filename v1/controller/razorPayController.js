@@ -27,7 +27,7 @@ const getpayments = async (req, res) => {
       payment_capture: 1,
     };
     const razorpayOrder = await razorpay.orders.create(options);
-
+console.log(razorpayOrder , "razorpayOrder")
     // Save transaction as pending
     const transaction = new TransactionHistory({
       JN_Id,
@@ -35,7 +35,7 @@ const getpayments = async (req, res) => {
       purpose: "Wallet Top-up via Razorpay",
       amountType: "credit",
       status: "pending",
-      razorpay_order_id: razorpayOrder.id,
+      razorpay_order_id: razorpayOrder.order.id,
     });
     await transaction.save();
 
@@ -74,6 +74,7 @@ const handlePaymentWebhook = async (req, res) => {
     if (!transaction) {
       return res.status(404).json({ error: "Transaction not found" });
     }
+    console.log(transaction , "transaction")
 
     // Prevent double processing
     if (transaction.status !== "pending") {
@@ -85,6 +86,7 @@ const handlePaymentWebhook = async (req, res) => {
     if (!partner) {
       return res.status(404).json({ error: "Partner not found" });
     }
+    console.log(partner , "partner")
 
     const updatedBalance = (Number(partner.balance) || 0) + Number(transaction.requestingAmount);
     partner.balance = updatedBalance;
