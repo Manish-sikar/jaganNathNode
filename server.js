@@ -1,12 +1,13 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+require("dotenv").config();
 const userRouter = require("./v1/routes/authRoutes");
 const path = require("path"); // Import the path module
 const cors = require("cors");
 const http = require("http");
 const fs = require("fs");
 const connectToDatabase = require("./database/mongoseConnection");
-require("dotenv").config();
+
 
 const app = express();
 const PORT = process.env.PORT || 4041;

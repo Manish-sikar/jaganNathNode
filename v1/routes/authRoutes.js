@@ -107,6 +107,9 @@ const {
   getTransitionHistory,
 } = require("../controller/reportStatusController");
 const { postlinkWithHttpData, getlinkWithHttpData, deletelinkWithHttpData } = require("../controller/linkWithHttpDataController");
+const { getpayments, handlePaymentWebhook } = require("../controller/razorPayController");
+
+ 
 
 // const storage = multer.diskStorage({
 //     destination: (req, file, cb) => {
@@ -293,5 +296,13 @@ router.get("/getAllDelar", getAllDelar);
 
 router.post("/deleteDelarRegister/:id",  deleteDelarRegister);
 router.post("/changePassDelarRegister", changePassDelarRegister);
+
+
+
+
+router.post("/testGetway" , getpayments );
+router.post("/payment-success" , handlePaymentWebhook  );
+
+
 
 module.exports = router;
