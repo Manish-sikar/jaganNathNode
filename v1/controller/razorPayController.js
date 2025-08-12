@@ -35,7 +35,7 @@ console.log(razorpayOrder , "razorpayOrder")
       purpose: "Wallet Top-up via Razorpay",
       amountType: "credit",
       status: "pending",
-      razorpay_order_id: razorpayOrder.order.id,
+      razorpay_order_id: razorpayOrder.id,
     });
     await transaction.save();
 

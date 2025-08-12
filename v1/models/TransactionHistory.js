@@ -22,12 +22,16 @@ const transactionHistorySchema = new mongoose.Schema({
     type: String,
     enum: ["credit", "debit"],
     required: true,
-  },  status: {
+  },
+  status: {
     type: String,
     enum: ["pending", "success"],
   },
-   Utr_No: {
+  Utr_No: {
     type: Number,
+  },
+  razorpay_order_id: {
+    type: String,
   },
   timestamp: {
     type: Date,
@@ -35,5 +39,8 @@ const transactionHistorySchema = new mongoose.Schema({
   },
 });
 
-const TransactionHistory = mongoose.model("TransactionHistory", transactionHistorySchema);
+const TransactionHistory = mongoose.model(
+  "TransactionHistory",
+  transactionHistorySchema
+);
 module.exports = TransactionHistory;
